@@ -1,0 +1,50 @@
+{
+    "name": "Sony STR-DH590",
+    "codes": {
+        "POWER": {
+            "protocol": "sony15",
+            "code": "0x300015"
+        },
+        "BLUETOOTH": {
+            "protocol": "sony20",
+            "code": "0x102871"
+        },
+        "MEDIA": {
+            "protocol": "sony20",
+            "code": "0x106840"
+        },
+        "BD": {
+            "protocol": "sony20",
+            "code": "0x102816"
+        },
+        "SAT": {
+            "protocol": "sony15",
+            "code": "0xb00003"
+        },
+        "GAME":  {
+            "protocol": "sony15",
+            "code": "0x30007c"
+        },
+        "CD":  {
+            "protocol": "sony15",
+            "code": "0x300025"
+        },
+        "TV":  {
+            "protocol": "sony15",
+            "code": "0x30006a"
+        },
+
+        "VOLUP": {
+            "protocol": "sony15",
+            "code": "0x300012"
+        },
+        "VOLDOWN": {
+            "protocol": "sony15",
+            "code": "0x300013"
+        },
+        "MUTE": {
+            "protocol": "sony15",
+            "code": "0x300014"
+        }
+    }
+}
