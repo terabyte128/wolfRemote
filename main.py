@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 TV_CONSTANTS = {
     "ip": "192.168.0.230",
-    "auth": "Zr9iux8krt",
+    "auth": "Z78a6d8gz5",
     "mac": "2c:64:1f:6d:3f:15"
 }
 
