@@ -1,12 +1,18 @@
 import subprocess
 import vizio_tv
-import cec
 import os
 import lifxlan as lifx
 import json
-from remotes import ir_remote
 
-from flask import Flask, render_template
+use_cec = True
+
+try:
+    import cec
+except ModuleNotFoundError:
+    use_cec = False
+
+from remotes import ir_remote
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 lan = lifx.LifxLAN()
@@ -22,14 +28,16 @@ for nickname, addr in things['lights'].items():
 
 TV_CONSTANTS = {
     "ip": "192.168.0.230",
-    "auth": "Zr9iux8krt",
+    "auth": "Z78a6d8gz5",
     "mac": "2c:64:1f:6d:3f:15"
 }
 
 tv = vizio_tv.VizioTV(TV_CONSTANTS['auth'], TV_CONSTANTS['ip'], TV_CONSTANTS['mac'])
 receiver = ir_remote.IRRemote(os.path.join(os.path.dirname(__file__), "remotes/sony_strdh590.json"), 10)
-cec.init()
-cec_devices = cec.list_devices()
+
+if use_cec:
+    cec.init()
+    cec_devices = cec.list_devices()
 
 def chromecast():
     tv.power_on()
@@ -89,7 +97,8 @@ def cec_cb(*args):
     if device.osd_string in VENDOR_SEQUENCES:
         VENDOR_SEQUENCES[device.osd_string]()
 
-cec.add_callback(cec_cb, cec.EVENT_ALL)
+if use_cec:
+    cec.add_callback(cec_cb, cec.EVENT_ALL)
 
 @app.route("/seq/<sequence>")
 def seq(sequence):
@@ -101,7 +110,7 @@ def seq(sequence):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", scenes=scenes)
 
 @app.route("/picture_mode/<mode>")
 def picture_mode(mode):
@@ -142,6 +151,8 @@ def set_scene():
         int(request.args['kelvin']) if request.args['kelvin'] else int(request.args['custom_kelvin'])
     ]
 
+    did_fail = False
+
     for name, on in scenes[request.args['scene']].items():
         try:
             if on:
@@ -150,6 +161,10 @@ def set_scene():
             else:
                 lights[name].set_power(False)
         except lifx.errors.WorkflowException:
+            did_fail = True
             print("failed to set %s" % name)
 
-    return ("OK", 200)
+    if did_fail:
+        return ("Failed", 500)
+    else:
+        return ("OK", 200)
