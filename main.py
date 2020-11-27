@@ -3,6 +3,7 @@ import vizio_tv
 import os
 import lifxlan as lifx
 import json
+from api import api_bp
 
 use_cec = True
 
@@ -17,6 +18,8 @@ from remotes import ir_remote
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
+app.register_blueprint(api_bp, url_prefix="/api")  # register API routes
+
 lan = lifx.LifxLAN()
 
 with open(os.path.join(app.root_path, "lights.json")) as f:
