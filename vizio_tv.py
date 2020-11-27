@@ -66,6 +66,9 @@ class VizioTV:
 
         self._put_payload("key_command/", payload)
 
+    def get_power_state(self):
+        return self._get_items("state/device/power_mode")[0]["VALUE"] == 1
+
     def power_on(self):
         try:
             self._power_on_normal()
@@ -85,12 +88,46 @@ class VizioTV:
 
         self._put_payload("key_command/", payload)
 
+    def get_input(self):
+        all_inputs = self._get_items("menu_native/dynamic/tv_settings/devices/name_input")
+        all_inputs = [ i['NAME'] for i in all_inputs ]
+
+        current_input = self._get_items("menu_native/dynamic/tv_settings/devices/current_input")[0]["VALUE"]
+
+        return {
+            "active_input": current_input,
+            "inputs": all_inputs
+        }
+
     def set_input(self, new_input):
         self._get_and_set_hashval("menu_native/dynamic/tv_settings/devices/current_input", new_input)
+
+    def get_backlight(self):
+        backlight = self._get_items("menu_native/dynamic/tv_settings/picture/backlight")
+        return {
+            "current": backlight[0]["VALUE"],
+            "max": 100,
+            "min": 0
+        }
 
     def set_backlight(self, backlight):
         assert backlight > 0 and backlight <= 100
         self._get_and_set_hashval("menu_native/dynamic/tv_settings/picture/backlight", backlight)
+
+    def get_picture_mode(self):
+        modes = self._get_items("menu_native/dynamic/tv_settings/picture/picture_mode")
+        current_mode = modes[0]["VALUE"]
+        other_modes = modes[0]["ELEMENTS"]
+
+        if current_mode[-1] == '*':
+            current_mode = current_mode[:-1]
+
+        other_modes = [ mode[:-1] if mode[-1] == '*' else mode for mode in other_modes ]
+
+        return {
+            "active_mode": current_mode,
+            "modes": other_modes
+        }
 
     def set_picture_mode(self, mode, also_send_star=True):
         self._get_and_set_hashval("menu_native/dynamic/tv_settings/picture/picture_mode", mode)
