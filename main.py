@@ -8,7 +8,9 @@ use_cec = True
 
 try:
     import cec
+    print("using cec")
 except ModuleNotFoundError:
+    print("cec not found, not using")
     use_cec = False
 
 from remotes import ir_remote
@@ -38,6 +40,7 @@ receiver = ir_remote.IRRemote(os.path.join(os.path.dirname(__file__), "remotes/s
 if use_cec:
     cec.init()
     cec_devices = cec.list_devices()
+    print("found", cec_devices)
 
 def chromecast():
     tv.power_on()
