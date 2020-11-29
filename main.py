@@ -21,7 +21,9 @@ use_cec = True
 
 try:
     import cec
+    print("using cec")
 except ModuleNotFoundError:
+    print("cec not found, not using")
     use_cec = False
 
 lan = lifx.LifxLAN()
@@ -47,6 +49,7 @@ receiver = ir_remote.IRRemote(os.path.join(app.root_path, "config", "sony_strdh5
 if use_cec:
     cec.init()
     cec_devices = cec.list_devices()
+    print("found", cec_devices)
 
 CEC_SEQUENCES = {
     "Chromecast": SEQUENCES['chromecast'],

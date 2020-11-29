@@ -10,6 +10,5 @@ wakeonlan = "*"
 requests = "*"
 lifxlan = "*"
 Flask = "*"
+cec = "*"
 
-[requires]
-python_version = "3.8"
