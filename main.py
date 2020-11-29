@@ -1,9 +1,21 @@
 import subprocess
-import vizio_tv
+from devices import vizio_tv
 import os
 import lifxlan as lifx
 import json
-from api import api_bp
+from devices import ir_remote
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+with app.app_context():
+    from api.tv import tv_bp
+    from api.receiver import receiver_bp
+    from api.sequences import seq_bp, SEQUENCES
+
+app.register_blueprint(tv_bp, url_prefix="/api/tv") 
+app.register_blueprint(receiver_bp, url_prefix="/api/receiver")
+app.register_blueprint(seq_bp, url_prefix="/api/sequence")
 
 use_cec = True
 
@@ -12,19 +24,13 @@ try:
 except ModuleNotFoundError:
     use_cec = False
 
-from remotes import ir_remote
-from flask import Flask, render_template, request
-
-app = Flask(__name__)
-app.register_blueprint(api_bp, url_prefix="/api")  # register API routes
-
 lan = lifx.LifxLAN()
 
-with open(os.path.join(app.root_path, "lights.json")) as f:
+with open(os.path.join(app.root_path, "config", "lights.json")) as f:
     things = json.load(f)
 
 lights = {}
-scenes = things['scenes']
+scenes = things['groups']
 
 for nickname, addr in things['lights'].items():
     lights[nickname] = lifx.Light(*addr)
@@ -36,50 +42,15 @@ TV_CONSTANTS = {
 }
 
 tv = vizio_tv.VizioTV(TV_CONSTANTS['auth'], TV_CONSTANTS['ip'], TV_CONSTANTS['mac'])
-receiver = ir_remote.IRRemote(os.path.join(os.path.dirname(__file__), "remotes/sony_strdh590.json"), 10)
+receiver = ir_remote.IRRemote(os.path.join(app.root_path, "config", "sony_strdh590.json"), 10)
 
 if use_cec:
     cec.init()
     cec_devices = cec.list_devices()
 
-def chromecast():
-    tv.power_on()
-    tv.set_input("HDMI-1")
-    receiver.send_command("MEDIA")
-
-def switch():
-    tv.power_on()
-    tv.set_input("HDMI-1")
-    receiver.send_command("GAME")
-
-def cubert():
-    tv.power_on()
-    tv.set_input("HDMI-2")
-    receiver.send_command("TV")
-
-def airplay():
-    tv.power_on()
-    tv.set_input("AirPlay")
-    receiver.send_command("TV")
-
-def vinyl():
-    receiver.send_command("CD")
-
-def all_off():
-    tv.power_off()
-    receiver.send_command("POWER")
-
-SEQUENCES = {
-    "chromecast": chromecast,
-    "switch": switch,
-    "cubert": cubert,
-    "all_off": all_off,
-    "airplay": airplay,
-    "vinyl": vinyl
-}
-
-VENDOR_SEQUENCES = {
-    "Chromecast": chromecast
+CEC_SEQUENCES = {
+    "Chromecast": SEQUENCES['chromecast'],
+    "NintendoSwitch": SEQUENCES['switch']
 }
 
 # callback for HDMI-CEC
@@ -97,8 +68,8 @@ def cec_cb(*args):
     print("device", device.osd_string, "became active")
 
     # activate seq if exists
-    if device.osd_string in VENDOR_SEQUENCES:
-        VENDOR_SEQUENCES[device.osd_string]()
+    if device.osd_string in CEC_SEQUENCES:
+        CEC_SEQUENCES[device.osd_string]()
 
 if use_cec:
     cec.add_callback(cec_cb, cec.EVENT_ALL)

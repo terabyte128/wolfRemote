@@ -6,7 +6,7 @@
     "c4": ["d0:73:d5:13:27:e2", "192.168.0.218"]
   },
 
-  "scenes": {
+  "groups": {
     "Dining Room": {
       "c1": false,
       "c2": true,
