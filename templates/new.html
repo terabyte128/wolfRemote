@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+    <title>WolfRemote</title>
+  </head>
+  <body>
+    <nav class="navbar">
+        <div class="container-fluid">
+            <h1 class="navbar-brand mb-0">
+                WolfRemote
+            </h1>
+            <span id="status" class="badge bg-success text-right">Ready</span>
+        </div>
+    </nav>
+    
+    <div class="container mb-3">
+        <ul class="nav nav-tabs nav-justified role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" id="tv-tab" data-bs-toggle="tab" href="#tv" role="tab">TV</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="lights-tab" data-bs-toggle="tab" href="#lights" role="tab">Lights</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="scenes-tab" data-bs-toggle="tab" href="#scenes" role="tab">Scenes</a>
+            </li>
+          </ul>
+
+    </div>
+
+    <div class="container">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="tv" role="tabpanel">
+                <div class="card mb-3 pb-0">
+                    <div class="card-body">
+                        <h5 class="card-title">I want to watch...</h5>
+                        <div>
+                            <button data-sequence="chromecast" data-url="/api/v1/sequence" data-method="put" type="button" class="btn btn-outline-primary mb-2 make-request">Chromecast</button>
+                            <button data-sequence="cubert" data-url="/api/v1/sequence" data-method="put"  type="button" class="btn btn-outline-primary mb-2 make-request">Cubert</button>
+                            <button data-sequence="switch" data-url="/api/v1/sequence" data-method="put"  type="button" class="btn btn-outline-primary mb-2 make-request">Switch</button>
+                            <button data-sequence="vinyl" data-url="/api/v1/sequence" data-method="put"  type="button" class="btn btn-outline-primary mb-2 make-request">Vinyl</button>
+                            <button data-sequence="airplay" data-url="/api/v1/sequence" data-method="put"  type="button" class="btn btn-outline-primary mb-2 make-request">AirPlay</button>
+                            <button data-sequence="all_off" data-url="/api/v1/sequence" data-method="put"  type="button" class="btn btn-outline-danger mb-2 make-request">I'm done</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Volume</h5>
+                        <div class="btn-group btn-block" role="group">
+                            <button data-amount="5" data-direction="down" data-url="/api/v1/receiver/volume" data-method="put" type="button" class="btn btn-outline-secondary make-request">-5</button>
+                            <button data-amount="1" data-direction="down" data-url="/api/v1/receiver/volume" data-method="put" type="button" class="btn btn-outline-primary make-request">-1</button>
+                            <button data-amount="1" data-direction="up" data-url="/api/v1/receiver/volume" data-method="put" type="button" class="btn btn-outline-success make-request">+1</button>
+                            <button data-amount="5" data-direction="up" data-url="/api/v1/receiver/volume" data-method="put" type="button" class="btn btn-outline-danger make-request">+5</button>
+                          </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Picture Modes</h5>
+                        {% for mode in picture_modes.modes %}
+                            <button data-mode="{{mode}}" data-url="/api/v1/tv/picture_mode" data-method="put" role="button" class="btn btn-outline-primary mb-2 make-request">{{mode}}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Backlight</h5>
+                        <input data-url="/api/v1/tv/backlight" data-method="put" data-key="backlight" type="range" class="form-range" id="backlight-slider" min="0" max="100" step="1">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="lights" role="tabpanel">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Brightness</h5>
+                        <div>
+                            <label for="dining-room" class="form-label">
+                                Dining Room
+                                <input id="dining-room" type="range" class="form-range light-slider" min="0" max="65535" step="1">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="living-room" class="form-label">
+                                Living Room
+                                <input id="living-room" type="range" class="form-range light-slider" min="0" max="65535" step="1">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Color Temperature</h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" data-hue="0" data-saturation="0" data-kelvin="3000" class="btn btn-light">Warm</button>
+                            <button type="button" data-hue="0" data-saturation="0" data-kelvin="3500" class="btn btn-light">Neutral</button>
+                            <button type="button" data-hue="0" data-saturation="0" data-kelvin="4000" class="btn btn-light">Bright</button>
+                        </div>
+                        <div class="mt-3">
+                            <label for="hue" class="form-label">
+                                Hue
+                                <input id="hue" type="range" class="form-range light-slider" min="0" max="65535" step="1" value="0">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="saturation" class="form-label">
+                                Saturation
+                                <input id="saturation" type="range" class="form-range light-slider" min="0" max="65535" step="1" value="0">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="kelvin" class="form-label">
+                                Kelvin
+                                <input id="kelvin" type="range" class="form-range light-slider" min="2500" max="9000" step="1" value="3500">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="scenes" role="tabpanel">Coming soon!</div>
+          </div>
+    </div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    <script src="{{url_for ('static', filename='dothings.js')}}"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>

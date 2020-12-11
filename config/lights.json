@@ -1,35 +1,35 @@
 {
   "lights": {
-    "c1": ["d0:73:d5:13:19:de", "192.168.0.215"], 
-    "c2": ["d0:73:d5:13:9c:59", "192.168.0.216"],
-    "c3": ["d0:73:d5:40:d6:c2", "192.168.0.217"],
-    "c4": ["d0:73:d5:13:27:e2", "192.168.0.218"]
+    "lr1": ["d0:73:d5:13:19:de", "192.168.0.215"], 
+    "dr1": ["d0:73:d5:13:9c:59", "192.168.0.216"],
+    "lr2": ["d0:73:d5:40:d6:c2", "192.168.0.217"],
+    "dr2": ["d0:73:d5:13:27:e2", "192.168.0.218"]
   },
 
   "groups": {
     "Dining Room": {
-      "c1": false,
-      "c2": true,
-      "c3": false,
-      "c4": true
+      "lr1": false,
+      "dr1": true,
+      "lr2": false,
+      "dr2": true
     },
     "TV Room": {
-      "c1": true,
-      "c2": false,
-      "c3": true,
-      "c4": false
+      "lr1": true,
+      "dr1": false,
+      "lr2": true,
+      "dr2": false
     },
     "All On": {
-      "c1": true,
-      "c2": true,
-      "c3": true,
-      "c4": true
+      "lr1": true,
+      "dr1": true,
+      "lr2": true,
+      "dr2": true
     },
     "All Off": {
-      "c1": false,
-      "c2": false,
-      "c3": false,
-      "c4": false
+      "lr1": false,
+      "dr1": false,
+      "lr2": false,
+      "dr2": false
     }
   }
 }

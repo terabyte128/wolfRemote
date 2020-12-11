@@ -4,18 +4,40 @@ import os
 import lifxlan as lifx
 import json
 from devices import ir_remote
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, helpers
+from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
 
 with app.app_context():
+    from api import TV
     from api.tv import tv_bp
     from api.receiver import receiver_bp
     from api.sequences import seq_bp, SEQUENCES
+    from api.lights import lights_bp
 
-app.register_blueprint(tv_bp, url_prefix="/api/tv") 
-app.register_blueprint(receiver_bp, url_prefix="/api/receiver")
-app.register_blueprint(seq_bp, url_prefix="/api/sequence")
+API_PREFIX = "/api/v1"
+
+app.register_blueprint(tv_bp, url_prefix=f"/{API_PREFIX}/tv") 
+app.register_blueprint(receiver_bp, url_prefix=f"{API_PREFIX}/receiver")
+app.register_blueprint(seq_bp, url_prefix=f"{API_PREFIX}/sequence")
+app.register_blueprint(lights_bp, url_prefix=f"{API_PREFIX}/lights")
+
+SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+
+with app.app_context():
+    API_URL = '/static/openapi.yaml'  # Our API url (can of course be a local resource)
+
+# Call factory function to create our blueprint
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "WolfRemote"
+    },
+)
+
+app.register_blueprint(swaggerui_blueprint)
 
 use_cec = True
 
@@ -85,9 +107,16 @@ def seq(sequence):
     else:
         return ("sequence not found", 404)
 
-@app.route("/")
+@app.route("/old")
 def index():
     return render_template("index.html", scenes=scenes)
+
+@app.route("/")
+def new():
+    context = {
+        "picture_modes": TV.get_picture_mode()
+    }
+    return render_template("new.html", **context)
 
 @app.route("/picture_mode/<mode>")
 def picture_mode(mode):

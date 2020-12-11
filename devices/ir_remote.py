@@ -22,3 +22,12 @@ class IRRemote:
 
         for i in range(self._tries):    
             subprocess.check_call(ctl)
+
+    def get_inputs(self):
+        return self._config['inputs']
+
+    def set_input(self, input_):
+        if input_ not in self.get_inputs():
+            raise ValueError("not in inputs")
+    
+        self.send_command(input_)

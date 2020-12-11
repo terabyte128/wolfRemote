@@ -39,7 +39,7 @@ SEQUENCES = {
     "vinyl": vinyl
 }
 
-@seq_bp.route("", methods=["GET", "POST"])
+@seq_bp.route("", methods=["GET", "PUT"])
 def sequence():
     if request.method == "GET":
         return {"all_sequences": list(SEQUENCES.keys())}
@@ -47,7 +47,9 @@ def sequence():
     if "sequence" not in request.json or {}:
         return {"error": "sequence is required"}, 400
 
-    if sequence in SEQUENCES:
+    sequence = request.json['sequence']
+
+    if sequence in SEQUENCES.keys():
         SEQUENCES[sequence]()
         return "", 204
     else:

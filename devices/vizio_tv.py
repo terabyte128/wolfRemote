@@ -6,7 +6,6 @@ from wakeonlan import send_magic_packet
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
 class VizioTV:
     def __init__(self, auth, ip, mac, port=7345):
         self.auth = auth

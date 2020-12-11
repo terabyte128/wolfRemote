@@ -33,7 +33,6 @@
             "protocol": "sony15",
             "code": "0x30006a"
         },
-
         "VOLUP": {
             "protocol": "sony15",
             "code": "0x300012"
@@ -46,5 +45,14 @@
             "protocol": "sony15",
             "code": "0x300014"
         }
-    }
+    },
+    "inputs": [
+        "BLUETOOTH",
+        "MEDIA",
+        "BD",
+        "SAT",
+        "GAME",
+        "CD",
+        "TV"
+    ]
 }

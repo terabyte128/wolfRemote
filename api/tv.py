@@ -10,7 +10,7 @@ tv_bp = Blueprint("api.tv", __name__)
 def get_picture_mode():
     return TV.get_picture_mode()
 
-@tv_bp.route("picture_mode", methods=["POST"])
+@tv_bp.route("picture_mode", methods=["PUT"])
 def set_picture_mode():
     if not "mode" in (request.json or {}):
         return {"error": "request must contain mode"}, 400
@@ -30,7 +30,7 @@ def get_power_state():
         "power_state": TV.get_power_state()
     }
 
-@tv_bp.route("power_state", methods=["POST"])
+@tv_bp.route("power_state", methods=["PUT"])
 def set_power_state():
     if not "powered_on" in (request.json or {}):
         return {"error": "request must contain power_state"}, 400
@@ -48,7 +48,7 @@ def set_power_state():
 def get_input():
     return TV.get_input()
 
-@tv_bp.route("input", methods=["POST"])
+@tv_bp.route("input", methods=["PUT"])
 def set_input():
     if not "input" in (request.json or {}):
         return {"error": "request must contain input"}, 400
@@ -66,10 +66,10 @@ def set_input():
 def get_backlight():
     return TV.get_backlight()
 
-@tv_bp.route("backlight", methods=["POST"])
+@tv_bp.route("backlight", methods=["PUT"])
 def set_backlight():
     if not "backlight" in (request.json or {}):
-        return {"error": "request must contain backlight"}
+        return {"error": "request must contain backlight"}, 400
     
     try:
         new_backlight = int(request.json['backlight'])
