@@ -223,6 +223,13 @@ paths:
                 $ref: '#/components/schemas/backlight'
         400: 
           $ref: '#/components/responses/errorResponse'
+  /tv/force_reboot:
+    put:
+      summary: Force the TV to reboot by toggling its power outlet.
+      tags: [tv]
+      responses:
+        204:
+          description: OK.
 
   /receiver/volume:
     put:

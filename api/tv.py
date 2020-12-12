@@ -32,7 +32,7 @@ def get_power_state():
 
 @tv_bp.route("power_state", methods=["PUT"])
 def set_power_state():
-    if not "powered_on" in (request.json or {}):
+    if not "power_state" in (request.json or {}):
         return {"error": "request must contain power_state"}, 400
 
     new_state = request.json['power_state']
@@ -84,5 +84,8 @@ def set_backlight():
     TV.set_backlight(new_backlight)
     return get_backlight()
 
-
+@tv_bp.route("force_reboot", methods=["PUT"])
+def force_reboot():
+    TV.force_reboot()
+    return "", 204
     

@@ -111,14 +111,23 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll("input.light-slider").forEach(ls => {
         ls.addEventListener('mouseup', setLightBrightness);
         ls.addEventListener('touchend', setLightBrightness);
-    })
+    });
 
     document.querySelectorAll("button.btn-light").forEach(lb => {
         lb.addEventListener('click', () => updateHSK(lb.dataset));
-    })
+    });
 
     document.querySelectorAll("button").forEach(b => {
         b.addEventListener('click', b.blur);
-    })
+    });
+
+    document.querySelector("#toggle-debug").addEventListener('click', () => {
+        var x = document.querySelector("#debug-options");
+        if (x.style.display === "none") {
+          x.style.display = "block";
+        } else {
+          x.style.display = "none";
+        }
+    });
 });
 

@@ -1,10 +1,6 @@
-import subprocess
-from devices import vizio_tv
 import os
-import lifxlan as lifx
 import json
-from devices import ir_remote
-from flask import Flask, render_template, request, helpers
+from flask import Flask, render_template
 from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
@@ -18,15 +14,15 @@ with app.app_context():
 
 API_PREFIX = "/api/v1"
 
+# register API blueprints
 app.register_blueprint(tv_bp, url_prefix=f"/{API_PREFIX}/tv") 
 app.register_blueprint(receiver_bp, url_prefix=f"{API_PREFIX}/receiver")
 app.register_blueprint(seq_bp, url_prefix=f"{API_PREFIX}/sequence")
 app.register_blueprint(lights_bp, url_prefix=f"{API_PREFIX}/lights")
 
+# register API docs blueprint
 SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
-
-with app.app_context():
-    API_URL = '/static/openapi.yaml'  # Our API url (can of course be a local resource)
+API_URL = '/static/openapi.yaml'  # Our API url (can of course be a local resource)
 
 # Call factory function to create our blueprint
 swaggerui_blueprint = get_swaggerui_blueprint(
@@ -39,6 +35,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 
 app.register_blueprint(swaggerui_blueprint)
 
+# try to import and use CEC if its installed
 use_cec = True
 
 try:
@@ -47,26 +44,6 @@ try:
 except ModuleNotFoundError:
     print("cec not found, not using")
     use_cec = False
-
-lan = lifx.LifxLAN()
-
-with open(os.path.join(app.root_path, "config", "lights.json")) as f:
-    things = json.load(f)
-
-lights = {}
-scenes = things['groups']
-
-for nickname, addr in things['lights'].items():
-    lights[nickname] = lifx.Light(*addr)
-
-TV_CONSTANTS = {
-    "ip": "192.168.0.230",
-    "auth": "Z78a6d8gz5",
-    "mac": "2c:64:1f:6d:3f:15"
-}
-
-tv = vizio_tv.VizioTV(TV_CONSTANTS['auth'], TV_CONSTANTS['ip'], TV_CONSTANTS['mac'])
-receiver = ir_remote.IRRemote(os.path.join(app.root_path, "config", "sony_strdh590.json"), 10)
 
 if use_cec:
     cec.init()
@@ -99,78 +76,9 @@ def cec_cb(*args):
 if use_cec:
     cec.add_callback(cec_cb, cec.EVENT_ALL)
 
-@app.route("/seq/<sequence>")
-def seq(sequence):
-    if sequence in SEQUENCES:
-        SEQUENCES[sequence]()
-        return ("OK", 200)
-    else:
-        return ("sequence not found", 404)
-
-@app.route("/old")
-def index():
-    return render_template("index.html", scenes=scenes)
-
 @app.route("/")
-def new():
+def index():
     context = {
         "picture_modes": TV.get_picture_mode()
     }
-    return render_template("new.html", **context)
-
-@app.route("/picture_mode/<mode>")
-def picture_mode(mode):
-    tv.set_picture_mode(mode)
-    return ("OK", 200)
-
-@app.route("/backlight/<int:backlight>")
-def backlight(backlight):
-    tv.set_backlight(backlight)
-    return ("OK", 200)
-
-@app.route("/force_reboot")
-def force_reboot():
-    tv.force_reboot()
-    return ("OK", 200)
-
-@app.route("/volup/<int:amount>")
-def volup(amount):
-    receiver.send_command("VOLUP")
-    return ("OK", 200)
-
-@app.route("/voldown/<int:amount>")
-def voldown(amount):
-    receiver.send_command("VOLDOWN")
-    return ("OK", 200)
-
-@app.route("/off")
-def off():
-    tv.power_off()
-    return ("OK", 200)
-
-@app.route("/set_scene")
-def set_scene():
-    color = [
-        int(request.args['hue']),
-        int(request.args['saturation']), 
-        int(request.args['brightness']), 
-        int(request.args['kelvin']) if request.args['kelvin'] else int(request.args['custom_kelvin'])
-    ]
-
-    did_fail = False
-
-    for name, on in scenes[request.args['scene']].items():
-        try:
-            if on:
-                lights[name].set_power(True)
-                lights[name].set_color(color)
-            else:
-                lights[name].set_power(False)
-        except lifx.errors.WorkflowException:
-            did_fail = True
-            print("failed to set %s" % name)
-
-    if did_fail:
-        return ("Failed", 500)
-    else:
-        return ("OK", 200)
+    return render_template("index.html", **context)
