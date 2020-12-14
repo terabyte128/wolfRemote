@@ -16,17 +16,24 @@ Control all your devices from a slick web UI!
 
 3. Reboot. Yes, do it.
 
-    (Troubleshooting: https://blog.gordonturner.com/2020/05/31/raspberry-pi-ir-receiver/)
+   (troubleshooting: [receiver](https://blog.gordonturner.com/2020/05/31/raspberry-pi-ir-receiver/), [transmitter](https://blog.gordonturner.com/2020/06/10/raspberry-pi-ir-transmitter/))
 
 4. `ir-keytable` uses native kernel modules to send and recv IR:
 
     `apt install ir-keytable` 
 
-## Install cec dependencies
+## Configure CEC 
 
 Needed for CEC routines. `pipenv` will fail if you don't do this.
 
 `apt install libcec-dev build-essential python3-dev`
+
+Also, you'll need to disable HDMI output (make sure you've got SSH set up before doing this ;)):
+
+```
+tvservice -o
+echo "/usr/bin/tvservice -o" >> /etc/rc.local
+```
 
 ## Setup the repo
 
@@ -47,11 +54,11 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
 
 7. `apt install nginx`
 
-    Now we need to do a magic dance to make WSGI serve the site through nginx.
+8.  Now we need to do a magic dance to make WSGI serve the site through nginx.
 
     Install uwsgi, which provides a bridge between nginx and the app:
 
-8.  `apt install uwsgi uwsgi-plugin-python3`
+    `apt install uwsgi uwsgi-plugin-python3`
 
 9. Add this stuff to `/etc/systemd/system/remote.service` to make `systemd` know about your service:
     
