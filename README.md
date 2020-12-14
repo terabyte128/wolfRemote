@@ -101,3 +101,5 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
     ```
 
 13. Congrats, you did it.
+
+Thanks to [all-free-download.com](https://all-free-download.com/free-vector/download/wildlife-background-wolf-moon-icon-starry-sky-decor_6829751.html) for the icon :)
