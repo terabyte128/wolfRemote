@@ -93,6 +93,10 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
 
     Note that you'll need to set up your DNS server so that it points whatever domain you want to access the remote at the pi's IP. Change `server_name` to match.
 
+11. Make `remote.conf` active. From `/etc/nginx/sites-enabled`:
+
+    ```ln -s ../sites-available/remote.conf .```
+
 11. Start everything up
 
     ```
