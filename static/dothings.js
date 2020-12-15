@@ -178,10 +178,9 @@ document.addEventListener("DOMContentLoaded", function() {
     })
 
     // set the current tab based on the tab before reload
-    if (currentTab = localStorage.getItem('currentTab')) {
-        var tab = new bootstrap.Tab(document.querySelector(`#${currentTab}`));
-        tab.show();
-    }
+    let currentTab = localStorage.getItem('currentTab') || "tv-tab";
+    var tab = new bootstrap.Tab(document.querySelector(`#${currentTab}`));
+    tab.show();
 
     // track current tab when switched
     document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(tab => {
