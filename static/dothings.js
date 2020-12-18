@@ -124,6 +124,8 @@ function setBacklight(e) {
     });
 }
 
+var focused = true;
+
 document.addEventListener("DOMContentLoaded", function() {
     // update sliders
     updateBacklightSlider();
