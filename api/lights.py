@@ -7,12 +7,20 @@ from flask import Blueprint, request
 
 lights_bp = Blueprint("lights", __name__)
 
+
 async def get_light_color(name: str, light: lifx.Light):
     try:
-        return (name, light.get_color(),)
+        return (
+            name,
+            light.get_color(),
+        )
     except lifx.WorkflowException as e:
         logging.exception("Failed to communicate with lights")
-        return (name, None,)
+        return (
+            name,
+            None,
+        )
+
 
 async def get_lights_async():
     lights = {}
@@ -27,14 +35,14 @@ async def get_lights_async():
 
         if color is None:
             return {
-                    "error": "Failed to communicate with lights",
+                "error": "Failed to communicate with lights",
             }, 500
 
         lights[light] = {
             "hue": color[0],
             "saturation": color[1],
             "brightness": color[2],
-            "kelvin": color[3]
+            "kelvin": color[3],
         }
 
     return lights
@@ -50,17 +58,23 @@ async def set_light_color(name: str, light: lifx.Light, new_color: dict):
         orig_color = light.get_color()
         color = list(orig_color)
 
-        for i, param in enumerate(['hue', 'saturation', 'brightness', 'kelvin']):
+        for i, param in enumerate(["hue", "saturation", "brightness", "kelvin"]):
             if param in new_color:
                 color[i] = new_color[param]
 
         if tuple(color) != orig_color:
             light.set_color(color, 500)
-        
-        return (name, color,)
+
+        return (
+            name,
+            color,
+        )
     except lifx.WorkflowException as e:
         logging.exception("Failed to communicate with lights")
-        return (name, None,)
+        return (
+            name,
+            None,
+        )
 
 
 async def set_lights_async(request_data):
@@ -77,14 +91,14 @@ async def set_lights_async(request_data):
 
         if color is None:
             return {
-                    "error": "Failed to communicate with lights",
+                "error": "Failed to communicate with lights",
             }, 500
 
         lights[light] = {
             "hue": color[0],
             "saturation": color[1],
             "brightness": color[2],
-            "kelvin": color[3]
+            "kelvin": color[3],
         }
 
     return lights
