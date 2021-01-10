@@ -64,18 +64,23 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
     
     ```
     [Unit]
-    Description=control all the things
+    Description=wolfRemote
     
     [Service]
+    Restart=on-failure
+    RestartSec=5s
+
+    User=pi
+    Group=video
+
     WorkingDirectory=/home/pi/remote
-    ExecStartPre=/usr/bin/bash -c 'mkdir -p /run/remote; chown pi:www-data /run/remote'
-    ExecStart=uwsgi --ini remote.ini
+    ExecStart=/usr/bin/pipenv run gunicorn main:app
     
     [Install]
     WantedBy=multi-user.target
     ```
 
-    Change stuff to reflect your directory if necessary.
+    Change stuff to reflect your directory if necessary. Gunicorn's default port is 8000.
 
 10. Add this stuff to `/etc/nginx/sites-available/remote.conf` so you can serve your website via nginx:
 
@@ -85,8 +90,7 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
             server_name remote;
     
             location / {
-                    include uwsgi_params;
-                    uwsgi_pass unix:/run/remote/remote.sock;
+		proxy_pass http://localhost:8000;
             }
     }
     ```
