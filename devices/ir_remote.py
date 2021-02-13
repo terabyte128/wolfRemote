@@ -11,7 +11,7 @@ class IRRemote:
     def commands(self):
         return self._config["codes"].keys()
 
-    def send_command(self, command):
+    def send_command(self, command, tries=self._tries):
         print("send_command", command)
 
         if not command in self._config["codes"].keys():
@@ -21,12 +21,14 @@ class IRRemote:
 
         ctl = [
             "/usr/bin/ir-ctl",
-            "--scancode",
-            "{}:{}".format(code["protocol"], code["code"]),
         ]
 
-        for i in range(self._tries):
-            subprocess.check_call(ctl)
+        ctl_args = [
+            "--scancode",
+            "{}:{}".format(code["protocol"], code["code"]),
+        ] * tries
+
+        subprocess.check_call(ctl + ctl_args)
 
     def get_inputs(self):
         return self._config["inputs"]

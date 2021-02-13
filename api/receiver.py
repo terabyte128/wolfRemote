@@ -4,6 +4,7 @@ import time
 
 from flask import Blueprint, request
 from api import TV, RECEIVER
+from fire_and_forget import run
 
 receiver_bp = Blueprint("api.receiver", __name__)
 
@@ -27,13 +28,13 @@ def volume():
     if volume_amount < 0 or volume_amount > 5:
         return {"error": "amount must be between 1 and 5"}, 400
 
-    for i in range(volume_amount):
+    def f():
         if request.json["direction"] == "up":
-            RECEIVER.send_command("VOLUP")
+            RECEIVER.send_command("VOLUP", amount)
         else:
-            RECEIVER.send_command("VOLDOWN")
+            RECEIVER.send_command("VOLDOWN", amount)
 
-        time.sleep(0.1)
+    run(f, [])
 
     return "", 204
 
