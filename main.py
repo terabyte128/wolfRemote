@@ -42,7 +42,7 @@ use_cec = True
 try:
     import cec
 
-    print("using cec")
+    logging.info("using cec")
 except ModuleNotFoundError:
     print("cec not found, not using")
     use_cec = False
@@ -50,10 +50,11 @@ except ModuleNotFoundError:
 if use_cec:
     cec.init()
     cec_devices = cec.list_devices()
-    print("found", cec_devices)
+    logging.info(f"found {cec_devices}")
 
 CEC_SEQUENCES = {
-    "Chromecast": SEQUENCES["chromecast"],
+    # chromecast concatenates the device name
+    "Living Room T": SEQUENCES["chromecast"],
     "NintendoSwitch": SEQUENCES["switch"],
 }
 
@@ -68,8 +69,10 @@ def cec_cb(*args):
     if params["opcode"] != 0x82:
         return  # only respond to 0x82, which is "active source"
 
+    logging.info(f"received CEC from {source} with params {params}")
+
     device = cec_devices[source]
-    print("device", device.osd_string, "became active")
+    logging.info(f"device {device.osd_string} became active")
 
     # activate seq if exists
     if device.osd_string in CEC_SEQUENCES:
