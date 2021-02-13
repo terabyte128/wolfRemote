@@ -4,7 +4,6 @@ import time
 
 from flask import Blueprint, request
 from api import TV, RECEIVER
-from fire_and_forget import run
 
 receiver_bp = Blueprint("api.receiver", __name__)
 
