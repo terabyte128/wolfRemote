@@ -28,13 +28,10 @@ def volume():
     if volume_amount < 0 or volume_amount > 5:
         return {"error": "amount must be between 1 and 5"}, 400
 
-    def f():
-        if request.json["direction"] == "up":
-            RECEIVER.send_command("VOLUP", amount)
-        else:
-            RECEIVER.send_command("VOLDOWN", amount)
-
-    run(f, [])
+    if request.json["direction"] == "up":
+        RECEIVER.send_command("VOLUP", volume_amount)
+    else:
+        RECEIVER.send_command("VOLDOWN", volume_amount)
 
     return "", 204
 

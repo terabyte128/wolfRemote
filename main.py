@@ -1,9 +1,12 @@
 import os
 import json
+import logging
 from flask import Flask, render_template
 from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__)
+
+logging.getLogger().setLevel(logging.INFO)
 
 with app.app_context():
     from api import TV

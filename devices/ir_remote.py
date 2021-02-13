@@ -1,5 +1,7 @@
 import json
 import subprocess
+import logging
+import time
 
 
 class IRRemote:
@@ -11,8 +13,11 @@ class IRRemote:
     def commands(self):
         return self._config["codes"].keys()
 
-    def send_command(self, command, tries=self._tries):
-        print("send_command", command)
+    def send_command(self, command, tries=None):
+        if tries is None:
+            tries = self._tries
+
+        logging.info(f"send_command {command}")
 
         if not command in self._config["codes"].keys():
             raise ValueError("command not found in config")
@@ -21,14 +26,16 @@ class IRRemote:
 
         ctl = [
             "/usr/bin/ir-ctl",
+            "--gap",
+            "20000",
         ]
 
         ctl_args = [
             "--scancode",
             "{}:{}".format(code["protocol"], code["code"]),
-        ] * tries
+        ]   
 
-        subprocess.check_call(ctl + ctl_args)
+        subprocess.Popen(ctl + ctl_args * tries * 4)
 
     def get_inputs(self):
         return self._config["inputs"]
