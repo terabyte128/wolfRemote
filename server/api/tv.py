@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, request
 from api import TV
 
-tv_bp = Blueprint("api.tv", __name__)
+tv_bp = Blueprint("api/tv", __name__)
 
 
 @tv_bp.route("picture_mode", methods=["GET"])

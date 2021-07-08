@@ -5,7 +5,7 @@ import time
 from flask import Blueprint, request
 from api import TV, RECEIVER
 
-receiver_bp = Blueprint("api.receiver", __name__)
+receiver_bp = Blueprint("api/receiver", __name__)
 
 
 @receiver_bp.route("volume", methods=["GET", "PUT"])

@@ -5,7 +5,7 @@ import asyncio
 from api import LIGHTS, SCENES
 from flask import Blueprint, request
 
-lights_bp = Blueprint("lights", __name__)
+lights_bp = Blueprint("api/lights", __name__)
 
 
 async def get_light_color(name: str, light: lifx.Light):
