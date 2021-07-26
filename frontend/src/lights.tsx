@@ -137,27 +137,22 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
         <Card>
             <Card.Header>Brightness</Card.Header>
             <Card.Body>
-                {Object.entries(LightGroups).map(([name, groupedLights]) => {
-                    const brightnesses = (groupedLights as readonly string[])
-                        .filter(l => l in lights)
-                        .map(l => lights[l].brightness);
-
+                {Object.entries(brightness).map(([group, brightness]) => {
                     return (
-                        <Form.Group key={name}>
+                        <Form.Group key={group}>
                             <Form.Label>
-                                {name}
                                 <Form.Range
                                     min={0}
                                     max={65535}
                                     step={1}
-                                    value={Math.max(...brightnesses)}
-                                    onChange={(e) => handleChange(e, name as keyof typeof LightGroups)}
+                                    value={brightness}
+                                    onChange={(e) => handleChange(e, group as keyof typeof LightGroups)}
                                     onTouchEnd={handleFinish}
                                     onMouseUp={handleFinish}
                                 />
                             </Form.Label>
                         </Form.Group>
-                    )
+                    );
                 })}
             </Card.Body>
         </Card>
