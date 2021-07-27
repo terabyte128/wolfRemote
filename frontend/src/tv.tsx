@@ -76,6 +76,7 @@ function IWantToWatchCard({ isLoading, setIsLoading }: LoadingProps) {
 }
 
 function VolumeCard(props: LoadingProps) {
+
     type VolumeDirection = "up" | "down";
     const [intervalID, setIntervalID] = useState<number>();
 
@@ -87,10 +88,20 @@ function VolumeCard(props: LoadingProps) {
     }
 
     let onMouseDown = (direction: VolumeDirection) => {
+        let numRequests = 0;
         props.setIsLoading(true);
-        setIntervalID(window.setInterval(() => {
+
+        const _intervalID = window.setInterval(() => {
             changeVolume(direction);
-        }, 250));
+            console.log(numRequests);
+
+            // don't send more than 10 at a time
+            if (++numRequests >= 10) {
+                window.clearInterval(_intervalID);
+            }
+        }, 250);
+
+        setIntervalID(_intervalID);
     }
 
     let onMouseUp = () => {

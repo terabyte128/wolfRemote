@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useEffect, useState } from 'react';
-import { Card, Container, Nav, Navbar } from 'react-bootstrap';
+import { Container, Nav, Navbar } from 'react-bootstrap';
 import { HashRouter as Router, Link, Route, Switch, useLocation } from 'react-router-dom';
 import './App.css';
 import wolfIcon from './img/wolfcorner.png';
@@ -8,6 +8,7 @@ import { TvBacklightCard, IWantToWatchCard, PictureModeCard, VolumeCard } from '
 import { LightCards } from './lights';
 import { LoadingProps } from './types';
 import { SWRConfig } from 'swr';
+import { ScenesCard } from './scenes';
 
 const routes = [
   {
@@ -28,8 +29,6 @@ function TopNav({ isLoading }: LoadingProps) {
   const [rotateDeg, setRotateDeg] = useState(0);
   const [rotateId, setRotateId] = useState(0);
   const location = useLocation();
-
-  console.log(location);
 
   // nonsense to make spinny wolf
   useEffect(() => {
@@ -65,6 +64,7 @@ function TopNav({ isLoading }: LoadingProps) {
               return <Nav.Link
                 as={Link}
                 eventKey={route.name}
+                key={route.name}
                 to={route.route}
                 active={route.route === location.pathname}
               >
@@ -113,9 +113,7 @@ function App() {
               <LightCards {...loadingProps} />
             </Route>
             <Route path="/scenes">
-              <Card>
-                <Card.Header>Coming soon?</Card.Header>
-              </Card>
+              <ScenesCard {...loadingProps} />
             </Route>
           </Switch>
         </Container>

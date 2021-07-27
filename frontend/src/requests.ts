@@ -1,3 +1,7 @@
+interface PutRequestType {
+    url: string,
+    params: { [key: string]: any },
+}
 
 export async function putRequest(
     url: string,
@@ -25,3 +29,10 @@ export async function putRequest(
     }
 }
 
+export async function chainPutRequests(...requests: PutRequestType[]) {
+    let promises: Promise<any>[] = [];
+    requests.forEach(r => {
+        promises.push(putRequest(r.url, r.params));
+    });
+    await Promise.all(promises);
+}
