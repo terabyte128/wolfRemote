@@ -7,7 +7,7 @@ import { useState } from "react";
 import * as Icons from 'react-bootstrap-icons';
 import { useEffect } from "react";
 
-const LightGroups = {
+export const LightGroups = {
     "Living Room": ["lr1", "lr2"] as const,
     "Dining Room": ["dr1", "dr2"] as const,
 } as const;
@@ -21,7 +21,7 @@ interface LightParams {
     kelvin: number,
 }
 
-type PartialLightParams = Partial<LightParams>;
+export type PartialLightParams = Partial<LightParams>;
 
 interface ColorTemperatureButton extends PartialLightParams {
     buttonColor: string,
@@ -140,7 +140,7 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
                 {Object.entries(brightness).map(([group, brightness]) => {
                     return (
                         <Form.Group key={group}>
-                            <Form.Label>
+                            <Form.Label>{group}
                                 <Form.Range
                                     min={0}
                                     max={65535}
