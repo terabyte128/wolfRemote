@@ -1,18 +1,15 @@
 interface PutRequestType {
-    url: string,
-    params: { [key: string]: any },
+    url: string;
+    params: { [key: string]: any };
 }
 
-export async function putRequest(
-    url: string,
-    params: { [key: string]: any },
-) {
+export async function putRequest(url: string, params: { [key: string]: any }) {
     const rsp = await fetch(url, {
         body: JSON.stringify(params),
         headers: {
             "content-type": "application/json",
         },
-        method: "PUT"
+        method: "PUT",
     });
 
     const text = await rsp.text();
@@ -31,7 +28,7 @@ export async function putRequest(
 
 export async function chainPutRequests(...requests: PutRequestType[]) {
     let promises: Promise<any>[] = [];
-    requests.forEach(r => {
+    requests.forEach((r) => {
         promises.push(putRequest(r.url, r.params));
     });
     await Promise.all(promises);
