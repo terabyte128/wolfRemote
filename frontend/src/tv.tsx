@@ -1,19 +1,24 @@
 import { useState } from "react";
 import { Button, ButtonGroup, Card, Form } from "react-bootstrap";
 import * as Icon from "react-bootstrap-icons";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { putRequest } from "./requests";
 import { LoadingProps } from "./types";
 import { sequences } from "./sequences";
 import LoadingMessage from "./alerts";
 
+const backlightEndpoint = "/api/v1/tv/backlight";
+
 function TvBacklightCard(props: LoadingProps) {
-    const endpoint = "/api/v1/tv/backlight";
-    const { data, error, mutate } = useSWR<{
+    const {
+        data,
+        error,
+        mutate: mutateBacklight,
+    } = useSWR<{
         current: number;
         min: number;
         max: number;
-    }>(endpoint);
+    }>(backlightEndpoint);
 
     if (error) {
         return <LoadingMessage name="backlight" error={true} />;
@@ -23,12 +28,14 @@ function TvBacklightCard(props: LoadingProps) {
 
     let handleFinish = async () => {
         props.setIsLoading(true);
-        await mutate(putRequest(endpoint, { backlight: data.current }));
+        await mutateBacklight(
+            putRequest(backlightEndpoint, { backlight: data.current })
+        );
         props.setIsLoading(false);
     };
 
     let handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        mutate({ ...data, current: e.target.valueAsNumber }, false);
+        mutateBacklight({ ...data, current: e.target.valueAsNumber }, false);
     };
 
     return (
@@ -144,7 +151,11 @@ function VolumeCard(props: LoadingProps) {
 
 function PictureModeCard(props: LoadingProps) {
     const endpoint = "/api/v1/tv/picture_mode";
-    const { data, error, mutate } = useSWR<{
+    const {
+        data,
+        error,
+        mutate: mutateMode,
+    } = useSWR<{
         active_mode: string;
         modes: string[];
     }>(endpoint);
@@ -172,9 +183,11 @@ function PictureModeCard(props: LoadingProps) {
                                 }
                                 onClick={async () => {
                                     props.setIsLoading(true);
-                                    await mutate(
+                                    await mutateMode(
                                         putRequest(endpoint, { mode: mode })
                                     );
+                                    // brightness is mode-dependent
+                                    mutate(backlightEndpoint);
                                     props.setIsLoading(false);
                                 }}
                             >
