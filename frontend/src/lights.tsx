@@ -106,6 +106,7 @@ export function LightCards(props: LoadingProps) {
 }
 
 function LightBrightnessCard({ lights, setLights }: LightProps) {
+    const [isSynced, setIsSynced] = useState(false);
     let [brightness, setBrightness] = useState<
         { [key in LightGroupName]: number }
     >(() => {
@@ -139,15 +140,35 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
         lightGroup: keyof typeof LightGroups
     ) => {
         // just update our local state
-        setBrightness({
-            ...brightness,
-            [lightGroup]: e.target.valueAsNumber,
-        });
+        if (isSynced) {
+            setBrightness({
+                "Dining Room": e.target.valueAsNumber,
+                "Living Room": e.target.valueAsNumber,
+            });
+        } else {
+            setBrightness({
+                ...brightness,
+                [lightGroup]: e.target.valueAsNumber,
+            });
+        }
     };
 
     return (
         <Card>
-            <Card.Header>Brightness</Card.Header>
+            <Card.Header>
+                Brightness
+                <span className="float-end">
+                    <label>
+                        <input
+                            type="checkbox"
+                            style={{ marginRight: "6px" }}
+                            checked={isSynced}
+                            onClick={() => setIsSynced((isSynced) => !isSynced)}
+                        />
+                        Sync
+                    </label>
+                </span>
+            </Card.Header>
             <Card.Body>
                 {Object.entries(brightness).map(([group, brightness]) => {
                     return (
