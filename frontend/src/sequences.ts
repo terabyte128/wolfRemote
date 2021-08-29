@@ -1,10 +1,10 @@
-import * as Icon from 'react-bootstrap-icons';
+import * as Icon from "react-bootstrap-icons";
 
 interface Sequence {
-    name: string,
-    endpoint: string,
-    icon?: Icon.Icon,
-    variant?: string,
+    name: string;
+    endpoint: string;
+    icon?: Icon.Icon;
+    variant?: string;
 }
 
 export const sequences: Sequence[] = [
@@ -37,6 +37,6 @@ export const sequences: Sequence[] = [
         name: "I'm done",
         endpoint: "all_off",
         icon: Icon.Power,
-        variant: "outline-danger"
-    }
-]
+        variant: "outline-danger",
+    },
+];
