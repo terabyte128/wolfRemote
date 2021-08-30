@@ -3,8 +3,8 @@ import os
 import lifxlan
 
 from flask import current_app
-from devices.ir_remote import IRRemote
-from devices.vizio_tv import VizioTV
+from server.devices.ir_remote import IRRemote
+from server.devices.vizio_tv import VizioTV
 
 with open(os.path.join(current_app.root_path, "config", "tv.json")) as f:
     _tv_constants = json.load(f)

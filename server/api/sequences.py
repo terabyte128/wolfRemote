@@ -1,7 +1,7 @@
 import wakeonlan
 
 from flask import Blueprint, request
-from api import TV, RECEIVER, LIGHTS
+from server.api import TV, RECEIVER
 
 seq_bp = Blueprint("sequences", __name__)
 
