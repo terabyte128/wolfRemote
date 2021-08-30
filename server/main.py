@@ -1,19 +1,17 @@
-import os
-import json
 import logging
-from flask import Flask, render_template, Blueprint
+from flask import Flask
 from flask_swagger_ui import get_swaggerui_blueprint
 
-app = Flask(__name__, static_folder="../frontend/build", static_url_path="/")
+app = Flask(__name__)
 
 logging.getLogger().setLevel(logging.INFO)
 
 with app.app_context():
-    from api import TV
-    from api.tv import tv_bp
-    from api.receiver import receiver_bp
-    from api.sequences import seq_bp, SEQUENCES
-    from api.lights import lights_bp
+    from server.api.tv import tv_bp
+    from server.api.receiver import receiver_bp
+    from server.api.sequences import seq_bp, SEQUENCES
+    from server.api.lights import lights_bp
+
 
 API_PREFIX = "/api/v1"
 
@@ -24,19 +22,11 @@ app.register_blueprint(receiver_bp, url_prefix=f"{API_PREFIX}/receiver")
 app.register_blueprint(seq_bp, url_prefix=f"{API_PREFIX}/sequence")
 app.register_blueprint(lights_bp, url_prefix=f"{API_PREFIX}/lights")
 
-# special blueprint to serve API static files from a separate directory from the frontend
-app.register_blueprint(
-    Blueprint(
-        "api_static",
-        "api_static",
-        static_folder="static",
-        static_url_path="/api/static",
-    )
-)
-
 # register API docs blueprint
 SWAGGER_URL = "/api/docs"  # URL for exposing Swagger UI (without trailing '/')
-API_URL = "/api/static/openapi.yaml"  # Our API url (can of course be a local resource)
+API_URL = (
+    "/static/openapi.yaml"  # Our API url (can of course be a local resource)
+)
 
 # Call factory function to create our blueprint
 swaggerui_blueprint = get_swaggerui_blueprint(
@@ -92,12 +82,3 @@ def cec_cb(*args):
 
 if use_cec:
     cec.add_callback(cec_cb, cec.EVENT_ALL)
-
-
-@app.route("/")
-def index():
-    return app.send_static_file("index.html")
-
-
-print("registered routes:")
-print(app.url_map)

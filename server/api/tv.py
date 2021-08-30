@@ -2,7 +2,7 @@ import json
 import os
 
 from flask import Blueprint, request
-from api import TV
+from server.api import TV
 
 tv_bp = Blueprint("api/tv", __name__)
 

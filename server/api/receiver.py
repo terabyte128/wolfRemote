@@ -1,9 +1,5 @@
-import json
-import os
-import time
-
 from flask import Blueprint, request
-from api import TV, RECEIVER
+from server.api import RECEIVER
 
 receiver_bp = Blueprint("api/receiver", __name__)
 
