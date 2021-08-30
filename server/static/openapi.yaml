@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: WolfRemote
+  description: beep boop control things
+  version: "1.0.0"
+  
+servers:
+  - url: /api/v1
+  
+tags:
+  - name: tv
+  - name: receiver
+  - name: lights
+  - name: sequences
+  
+components:
+  schemas:
+    pictureMode:
+      type: object
+      properties:
+        active_mode:
+          type: string
+          example: Calibrated
+        modes: 
+          type: array
+          items:
+            type: string
+            example: [Calibrated, Calibrated Dark]
+    errorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    inputs:
+      type: object
+      properties:
+        active_input:
+          type: string
+          example: HDMI-1
+        inputs:
+          type: array
+          items:
+            type: string
+            example: [HDMI-1, HDMI-2]
+    backlight:
+      type: object
+      properties:
+        current:
+          type: integer
+          example: 50
+        max:
+          type: integer
+          example: 100
+        min:
+          type: integer
+          example: 0
+    light:
+      type: object
+      properties:
+        light:
+          type: object
+          description: A dict of all lights.
+          properties:
+            hue:  
+              type: integer
+              description: 0-65535
+              example: 100
+            saturation:
+              type: integer
+              description: 0-65535
+              example: 100
+            brightness:
+              type: integer
+              description: 0-65535
+              example: 100
+            kelvin:
+              type: integer
+              description: 2500-9000
+              example: 5000
+    
+  responses:
+    errorResponse:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+  
+paths:
+  /tv/picture_mode:
+    get:
+      summary: Get active picture more and other available modes.
+      tags: [tv]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pictureMode'
+    put:
+      summary: Set the active picture mode.
+      description: mode must be in the list of modes.
+      tags: [tv]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  example: Calibrated
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pictureMode'
+        400:
+          $ref: '#/components/responses/errorResponse'
+  /tv/power_state:
+    get:
+      summary: Get power state.
+      tags: [tv]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  power_state:
+                    type: boolean
+    put:
+      summary: Set power state.
+      tags: [tv]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                power_state:
+                  type: boolean
+            
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  power_state:
+                    type: boolean
+        400:
+          $ref: '#/components/responses/errorResponse'
+  /tv/inputs:
+    get:
+      summary: Get inputs.
+      tags: [tv]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inputs'
+    put:
+      summary: Change input.
+      description: input must be in the list of inputs.
+      tags: [tv]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                input:
+                  type: string
+                  example: "HDMI-1"
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inputs'
+        400:
+          $ref: '#/components/responses/errorResponse'
+  /tv/backlight:
+    get:
+      summary: Get backlight brightness.
+      tags: [tv]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/backlight'
+    put:
+      summary: Set backlight brightness.
+      tags: [tv]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                backlight:
+                  type: integer
+                  example: 20
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/backlight'
+        400: 
+          $ref: '#/components/responses/errorResponse'
+  /tv/force_reboot:
+    put:
+      summary: Force the TV to reboot by toggling its power outlet.
+      tags: [tv]
+      responses:
+        204:
+          description: OK.
+
+  /receiver/volume:
+    put:
+      summary: Change receiver volume.
+      tags: [receiver]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: must be between 1 and 5
+                direction:
+                  type: string
+                  enum: [up, down]
+      responses:
+        204:
+          description: OK.
+        400:
+          $ref: '#/components/responses/errorResponse'
+          
+  /receiver/input:
+    get:
+      summary: Get receiver inputs.
+      tags: [receiver]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inputs:
+                    type: array
+                    items: 
+                      type: string
+                      example: [TV, MEDIA]
+    put:
+      summary: Set receiver input.
+      tags: [receiver]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: string
+                  example: MEDIA
+      responses:
+        204:
+          description: OK.
+        400:
+          $ref: '#/components/responses/errorResponse'
+  
+  /sequence:
+    get:
+      summary: Get all sequences.
+      tags: [sequences]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  all_sequences:
+                    type: array
+                    items: 
+                      type: string
+                      example: [chromecast, switch]
+    put:
+      summary: Execute a sequence.
+      tags: [sequences]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sequence:
+                  type: string
+                  example: chromecast
+      responses:
+        204:
+          description: OK.
+        400:
+          $ref: '#/components/responses/errorResponse'
+          
+  /lights:
+    get:
+      summary: Get light values.
+      tags: [lights]
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/light'
+    put:
+      summary: Set light values.
+      tags: [lights]
+      requestBody:
+        description: A dictionary of each light you wish to update, mapping to each property you wish to change. Properties not given will remain the same.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/light'
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/light'
+        400:
+          $ref: '#/components/responses/errorResponse'
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
