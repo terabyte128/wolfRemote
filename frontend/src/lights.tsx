@@ -106,7 +106,6 @@ export function LightCards(props: LoadingProps) {
 }
 
 function LightBrightnessCard({ lights, setLights }: LightProps) {
-    const [isSynced, setIsSynced] = useState(false);
     let [brightness, setBrightness] = useState<
         { [key in LightGroupName]: number }
     >(() => {
@@ -121,6 +120,12 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
 
         return values as { [key in LightGroupName]: number };
     });
+
+    const brightnessVals = Object.values(brightness);
+    const sameBrightness =
+        brightnessVals.length > 0 &&
+        brightnessVals.every((v) => v === brightnessVals[0]);
+    const [isSynced, setIsSynced] = useState(sameBrightness);
 
     let handleFinish = async () => {
         let values: { [key: string]: PartialLightParams } = {};
