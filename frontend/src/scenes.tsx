@@ -11,7 +11,7 @@ export function ScenesCard({ setIsLoading }: LoadingProps) {
             <Card.Body>
                 <Button
                     variant="outline-primary"
-                    onChange={async () => {
+                    onClick={async () => {
                         const lightsOff: { [key: string]: PartialLightParams } =
                             {};
                         Object.values(LightGroups).forEach((group) => {
@@ -26,7 +26,7 @@ export function ScenesCard({ setIsLoading }: LoadingProps) {
                         await chainPutRequests(
                             {
                                 url: "/api/v1/sequence",
-                                params: { sequence: "chromecast" },
+                                params: { sequence: "all_off" },
                             },
                             { url: "/api/v1/lights", params: lightsOff }
                         );

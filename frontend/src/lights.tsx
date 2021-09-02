@@ -203,25 +203,40 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
     );
 }
 
-function ColorTemperatureCard({ lights, setLights }: LightProps) {
+const colorTemperatures: { [key: string]: PartialLightParams } = {
+    warm: {
+        hue: 0,
+        saturation: 0,
+        kelvin: 3000,
+    },
+    neutral: {
+        hue: 0,
+        saturation: 0,
+        kelvin: 3500,
+    },
+    bright: {
+        hue: 0,
+        saturation: 0,
+        kelvin: 4000,
+    },
+};
+
+function ColorTemperatureCard({ setLights }: LightProps) {
     // HSLK is only set for everything at once, so we don't particularly care what it is
     // for each individual light
     const [hsbColor, setHsbColor] = useState<PartialLightParams>({});
 
     const colorTemperatureButtons: { [key: string]: ColorTemperatureButton } = {
         Warm: {
-            hue: 0,
-            saturation: 0,
-            kelvin: 3000,
+            ...colorTemperatures["warm"],
             buttonColor: "#ffe59d",
         },
         Neutral: {
-            hue: 0,
-            saturation: 0,
-            kelvin: 3500,
+            ...colorTemperatures["neutral"],
             buttonColor: "#fff7e4",
         },
         Bright: {
+            ...colorTemperatures["bright"],
             hue: 0,
             saturation: 0,
             kelvin: 4000,
