@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import {
     HashRouter as Router,
@@ -104,6 +104,8 @@ function TopNav({ isLoading }: LoadingProps) {
     );
 }
 
+export const LoadingContext = createContext<LoadingProps>(undefined!);
+
 function App() {
     const [isLoading, setIsLoading] = useState(false);
 
@@ -131,18 +133,20 @@ function App() {
                 <TopNav {...loadingProps} />
                 <Container style={{ marginTop: "75px" }}>
                     <Switch>
-                        <Route exact path="/">
-                            <IWantToWatchCard {...loadingProps} />
-                            <VolumeCard {...loadingProps} />
-                            <TvBacklightCard {...loadingProps} />
-                            <PictureModeCard {...loadingProps} />
-                        </Route>
-                        <Route path="/lights">
-                            <LightCards {...loadingProps} />
-                        </Route>
-                        <Route path="/scenes">
-                            <ScenesCard {...loadingProps} />
-                        </Route>
+                        <LoadingContext.Provider value={loadingProps}>
+                            <Route exact path="/">
+                                <IWantToWatchCard />
+                                <VolumeCard />
+                                <TvBacklightCard />
+                                <PictureModeCard />
+                            </Route>
+                            <Route path="/lights">
+                                <LightCards />
+                            </Route>
+                            <Route path="/scenes">
+                                <ScenesCard />
+                            </Route>
+                        </LoadingContext.Provider>
                     </Switch>
                 </Container>
             </Router>

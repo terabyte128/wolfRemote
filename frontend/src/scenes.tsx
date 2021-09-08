@@ -1,10 +1,13 @@
 import { Button, Card } from "react-bootstrap";
-import { LoadingProps } from "./types";
 import * as Icon from "react-bootstrap-icons";
 import { chainPutRequests } from "./requests";
 import { LightGroups, PartialLightParams } from "./lights";
+import { LoadingContext } from "./App";
+import { useContext } from "react";
 
-export function ScenesCard({ setIsLoading }: LoadingProps) {
+export function ScenesCard() {
+    const { setIsLoading } = useContext(LoadingContext);
+
     return (
         <Card>
             <Card.Header>Scenes</Card.Header>
