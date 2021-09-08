@@ -1,11 +1,11 @@
 import { Alert, Button, ButtonGroup, Card, Form } from "react-bootstrap";
 import useSWR from "swr";
-import { LoadingProps } from "./types";
 import { putRequest } from "./requests";
 import { HslColorPicker, HslColor } from "react-colorful";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import * as Icons from "react-bootstrap-icons";
 import { useEffect } from "react";
+import { LoadingContext } from "./App";
 
 export const LightGroups = {
     "Living Room": ["lr1", "lr2"] as const,
@@ -38,8 +38,9 @@ interface LightProps {
 
 const endpoint = "/api/v1/lights";
 
-export function LightCards(props: LoadingProps) {
+export function LightCards() {
     const { data, error, mutate, isValidating } = useSWR<LightMap>(endpoint);
+    const { setIsLoading } = useContext(LoadingContext);
     useEffect(() => {}, [data]);
 
     if (error) {
@@ -68,7 +69,7 @@ export function LightCards(props: LoadingProps) {
     const setLights = async (changedData: {
         [key: string]: PartialLightParams;
     }) => {
-        props.setIsLoading(true);
+        setIsLoading(true);
 
         let newData: LightMap = {};
         Object.entries(changedData).forEach(([light, changed]) => {
@@ -86,7 +87,7 @@ export function LightCards(props: LoadingProps) {
             console.log(e);
         }
 
-        props.setIsLoading(false);
+        setIsLoading(false);
 
         // wait a bit for the lights to actually finish updating
         setTimeout(mutate, 1000);

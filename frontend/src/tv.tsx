@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, ButtonGroup, Card, Form } from "react-bootstrap";
 import * as Icon from "react-bootstrap-icons";
 import useSWR, { mutate } from "swr";
 import { putRequest } from "./requests";
-import { LoadingProps } from "./types";
 import { sequences } from "./sequences";
 import LoadingMessage from "./alerts";
+import { LoadingContext } from "./App";
 
 const backlightEndpoint = "/api/v1/tv/backlight";
 
-function TvBacklightCard(props: LoadingProps) {
+function TvBacklightCard() {
     const {
         data,
         error,
@@ -19,6 +19,7 @@ function TvBacklightCard(props: LoadingProps) {
         min: number;
         max: number;
     }>(backlightEndpoint);
+    const { setIsLoading } = useContext(LoadingContext);
 
     if (error) {
         return <LoadingMessage name="backlight" error={true} />;
@@ -27,11 +28,11 @@ function TvBacklightCard(props: LoadingProps) {
     }
 
     let handleFinish = async () => {
-        props.setIsLoading(true);
+        setIsLoading(true);
         await mutateBacklight(
             putRequest(backlightEndpoint, { backlight: data.current })
         );
-        props.setIsLoading(false);
+        setIsLoading(false);
     };
 
     let handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +57,9 @@ function TvBacklightCard(props: LoadingProps) {
     );
 }
 
-function IWantToWatchCard({ isLoading, setIsLoading }: LoadingProps) {
+function IWantToWatchCard() {
+    const { isLoading, setIsLoading } = useContext(LoadingContext);
+
     return (
         <Card>
             <Card.Header>I want to watch...</Card.Header>
@@ -86,9 +89,10 @@ function IWantToWatchCard({ isLoading, setIsLoading }: LoadingProps) {
     );
 }
 
-function VolumeCard(props: LoadingProps) {
+function VolumeCard() {
     type VolumeDirection = "up" | "down";
     const [intervalID, setIntervalID] = useState<number>();
+    const { setIsLoading } = useContext(LoadingContext);
 
     let changeVolume = async (direction: VolumeDirection) => {
         await putRequest("/api/v1/receiver/volume", {
@@ -99,7 +103,7 @@ function VolumeCard(props: LoadingProps) {
 
     let onMouseDown = (direction: VolumeDirection) => {
         let numRequests = 0;
-        props.setIsLoading(true);
+        setIsLoading(true);
 
         const _intervalID = window.setInterval(() => {
             changeVolume(direction);
@@ -108,14 +112,14 @@ function VolumeCard(props: LoadingProps) {
             if (++numRequests >= 10) {
                 window.clearInterval(_intervalID);
             }
-        }, 400);
+        }, 500);
 
         setIntervalID(_intervalID);
     };
 
     let onMouseUp = () => {
         window.clearInterval(intervalID);
-        props.setIsLoading(false);
+        setIsLoading(false);
     };
 
     return (
@@ -149,7 +153,7 @@ function VolumeCard(props: LoadingProps) {
     );
 }
 
-function PictureModeCard(props: LoadingProps) {
+function PictureModeCard() {
     const endpoint = "/api/v1/tv/picture_mode";
     const {
         data,
@@ -159,6 +163,7 @@ function PictureModeCard(props: LoadingProps) {
         active_mode: string;
         modes: string[];
     }>(endpoint);
+    const { setIsLoading } = useContext(LoadingContext);
 
     if (error) {
         return <LoadingMessage name="picture modes" error={true} />;
@@ -182,13 +187,13 @@ function PictureModeCard(props: LoadingProps) {
                                         : "outline-primary"
                                 }
                                 onClick={async () => {
-                                    props.setIsLoading(true);
+                                    setIsLoading(true);
                                     await mutateMode(
                                         putRequest(endpoint, { mode: mode })
                                     );
                                     // brightness is mode-dependent
                                     mutate(backlightEndpoint);
-                                    props.setIsLoading(false);
+                                    setIsLoading(false);
                                 }}
                             >
                                 {mode}
