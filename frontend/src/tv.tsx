@@ -13,6 +13,7 @@ function TvBacklightCard() {
     const {
         data,
         error,
+        isValidating,
         mutate: mutateBacklight,
     } = useSWR<{
         current: number;
@@ -21,10 +22,17 @@ function TvBacklightCard() {
     }>(backlightEndpoint);
     const { setIsLoading } = useContext(LoadingContext);
 
-    if (error) {
-        return <LoadingMessage name="backlight" error={true} />;
-    } else if (!data) {
-        return <LoadingMessage name="backlight" error={false} />;
+    if (error || !data) {
+        return (
+            <LoadingMessage
+                name="backlight"
+                error={error}
+                refreshParams={{
+                    isValidating: isValidating,
+                    mutate: mutateBacklight,
+                }}
+            />
+        );
     }
 
     let handleFinish = async () => {
@@ -158,6 +166,7 @@ function PictureModeCard() {
     const {
         data,
         error,
+        isValidating,
         mutate: mutateMode,
     } = useSWR<{
         active_mode: string;
@@ -165,10 +174,17 @@ function PictureModeCard() {
     }>(endpoint);
     const { setIsLoading } = useContext(LoadingContext);
 
-    if (error) {
-        return <LoadingMessage name="picture modes" error={true} />;
-    } else if (!data) {
-        return <LoadingMessage name="picture modes" error={false} />;
+    if (!data || error) {
+        return (
+            <LoadingMessage
+                name="picture modes"
+                error={error}
+                refreshParams={{
+                    isValidating: isValidating,
+                    mutate: mutateMode,
+                }}
+            />
+        );
     }
 
     return (
