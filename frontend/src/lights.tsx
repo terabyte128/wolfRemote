@@ -1,11 +1,11 @@
-import { Alert, Button, ButtonGroup, Card, Form } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Form } from "react-bootstrap";
 import useSWR from "swr";
 import { putRequest } from "./requests";
 import { HslColorPicker, HslColor } from "react-colorful";
 import { useContext, useState } from "react";
-import * as Icons from "react-bootstrap-icons";
 import { useEffect } from "react";
 import { LoadingContext } from "./App";
+import LoadingMessage from "./alerts";
 
 export const LightGroups = {
     "Living Room": ["lr1", "lr2"] as const,
@@ -43,27 +43,18 @@ export function LightCards() {
     const { setIsLoading } = useContext(LoadingContext);
     useEffect(() => {}, [data]);
 
-    if (error) {
+    if (!data || error) {
         return (
-            <Alert variant="warning">
-                <p>Failed to communicate with lights. Are they on?</p>
-                <Button
-                    variant="warning"
-                    disabled={isValidating}
-                    onClick={() => mutate()}
-                >
-                    {isValidating ? (
-                        "Trying again..."
-                    ) : (
-                        <>
-                            <Icons.ArrowCounterclockwise /> Try again
-                        </>
-                    )}
-                </Button>
-            </Alert>
+            <LoadingMessage
+                name="Failed to communicate with lights. Are they on?"
+                useCustomMessage={true}
+                error={error}
+                refreshParams={{
+                    mutate: mutate,
+                    isValidating: isValidating,
+                }}
+            />
         );
-    } else if (!data) {
-        return <Alert variant="primary">Loading...</Alert>;
     }
 
     const setLights = async (changedData: {
