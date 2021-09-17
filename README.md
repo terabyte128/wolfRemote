@@ -10,9 +10,9 @@ Control all your devices from a slick web UI!
 
     ```sudo apt install vim```
 
-2. Open `/boot/config.txt` and uncomment the two lines involving `gpio-ir`. Change the `gpio_pin`s as necessary. 
-    
-    **NOTE TO SAM: for you, rx is 23 and tx is 22.** 
+2. Open `/boot/config.txt` and uncomment the two lines involving `gpio-ir`. Change the `gpio_pin`s as necessary.
+
+    **NOTE TO SAM: for you, rx is 23 and tx is 22.**
 
 3. Reboot. Yes, do it.
 
@@ -20,20 +20,7 @@ Control all your devices from a slick web UI!
 
 4. `ir-keytable` uses native kernel modules to send and recv IR:
 
-    `apt install ir-keytable` 
-
-## Configure CEC 
-
-Needed for CEC routines. `pipenv` will fail if you don't do this.
-
-`apt install libcec-dev build-essential python3-dev`
-
-Also, you'll need to disable HDMI output (make sure you've got SSH set up before doing this ;)):
-
-```
-tvservice -o
-echo "/usr/bin/tvservice -o" >> /etc/rc.local
-```
+    `apt install ir-keytable`
 
 ## Setup the repo
 
@@ -41,12 +28,10 @@ echo "/usr/bin/tvservice -o" >> /etc/rc.local
 
 6. Then clone the repo.
 
-7. Install pipenv: `apt install pipenv`
+7. Install poetry: `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -`
 
-8. Get a nice mug of hot chocolate, `cd` to the repo's root directory, and `pipenv sync`.
+8. Get a nice mug of hot chocolate, `cd` to the repo's root directory, and `poetry update`.
    (this might take a while, especially on a RPi Zero).
-
-   (You will probably want to set `PIPENV_TIMEOUT=500` otherwise it will probably time out)
 
 ## Configure webserver
 
@@ -54,18 +39,12 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
 
 7. `apt install nginx`
 
-8.  Now we need to do a magic dance to make WSGI serve the site through nginx.
-
-    Install uwsgi, which provides a bridge between nginx and the app:
-
-    `apt install uwsgi uwsgi-plugin-python3`
-
 9. Add this stuff to `/etc/systemd/system/remote.service` to make `systemd` know about your service:
-    
+
     ```
     [Unit]
     Description=wolfRemote
-    
+
     [Service]
     Restart=on-failure
     RestartSec=5s
@@ -74,8 +53,8 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
     Group=video
 
     WorkingDirectory=/home/pi/remote
-    ExecStart=/usr/bin/pipenv run gunicorn main:app
-    
+    ExecStart=/usr/bin/pipenv run gunicorn -w 4 -t 60 --chdir server main:app
+
     [Install]
     WantedBy=multi-user.target
     ```
@@ -85,14 +64,23 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
 10. Add this stuff to `/etc/nginx/sites-available/remote.conf` so you can serve your website via nginx:
 
     ```
-    server {
-            listen 80;
-            server_name remote;
-    
-            location / {
-		proxy_pass http://localhost:8000;
-            }
-    }
+	server {
+			listen 80;
+			server_name remote;
+
+			location / {
+					root /home/pi/remote/frontend/build;
+			}
+
+			location /api {
+					proxy_pass http://localhost:8000;
+			}
+
+			location /static/openapi.yaml {
+					# definitions for openapi are handled by the server
+					proxy_pass http://localhost:8000;
+			}
+	}
     ```
 
     Note that you'll need to set up your DNS server so that it points whatever domain you want to access the remote at the pi's IP. Change `server_name` to match.
