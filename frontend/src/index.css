@@ -1,0 +1,8 @@
+.button-grouped {
+    margin-right: 6px;
+    margin-bottom: 6px;
+}
+
+.button-grouped:last-of-type {
+    margin-right: 0px;
+}

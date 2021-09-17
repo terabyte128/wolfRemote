@@ -1,0 +1,44 @@
+.button-icon {
+    margin-top: -3px;
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+}
+
+input[type="range"] {
+    padding-top: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    height: 24px;
+    width: 24px;
+    margin-top: -8px;
+    cursor: pointer;
+}
+
+body {
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotateZ(0);
+    }
+    100% {
+        transform: rotateZ(360deg);
+    }
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+label {
+    width: 100%;
+}
+
+label > input[type="range"] {
+    margin-top: 4px;
+    width: 100%;
+}

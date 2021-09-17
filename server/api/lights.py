@@ -2,10 +2,10 @@ import lifxlan as lifx
 import logging
 
 import asyncio
-from api import LIGHTS, SCENES
+from server.api import LIGHTS
 from flask import Blueprint, request
 
-lights_bp = Blueprint("lights", __name__)
+lights_bp = Blueprint("api/lights", __name__)
 
 
 async def get_light_color(name: str, light: lifx.Light):
@@ -58,7 +58,9 @@ async def set_light_color(name: str, light: lifx.Light, new_color: dict):
         orig_color = light.get_color()
         color = list(orig_color)
 
-        for i, param in enumerate(["hue", "saturation", "brightness", "kelvin"]):
+        for i, param in enumerate(
+            ["hue", "saturation", "brightness", "kelvin"]
+        ):
             if param in new_color:
                 color[i] = new_color[param]
 
