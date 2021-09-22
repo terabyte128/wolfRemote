@@ -28,7 +28,7 @@ interface ColorTemperatureButton extends PartialLightParams {
 }
 
 interface LightMap {
-    [key: string]: LightParams;
+    lights: { [key: string]: LightParams };
 }
 
 interface LightProps {
@@ -62,10 +62,10 @@ export function LightCards() {
     }) => {
         setIsLoading(true);
 
-        let newData: LightMap = {};
+        let newData: LightMap = { lights: {} };
         Object.entries(changedData).forEach(([light, changed]) => {
-            newData[light] = {
-                ...data[light],
+            newData.lights[light] = {
+                ...data.lights[light],
                 ...changed,
             };
         });
@@ -106,7 +106,7 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
         Object.entries(LightGroups).forEach(([name, groupedLights]) => {
             const brightnesses = (groupedLights as readonly string[])
                 .filter((l) => l in lights)
-                .map((l) => lights[l].brightness);
+                .map((l) => lights.lights[l].brightness);
             values[name as string] = Math.max(...brightnesses);
         });
 
