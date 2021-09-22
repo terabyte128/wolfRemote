@@ -81,7 +81,7 @@ function IWantToWatchCard() {
                             variant={seq.variant || "outline-primary"}
                             onClick={async () => {
                                 setIsLoading(true);
-                                await putRequest(`/api/v1/sequence`, {
+                                await putRequest(`/api/v1/sequences`, {
                                     sequence: seq.endpoint,
                                 });
                                 setIsLoading(false);
