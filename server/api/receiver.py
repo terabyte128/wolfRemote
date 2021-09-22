@@ -1,48 +1,54 @@
-from flask import Blueprint, request
+from typing import List
+from typing_extensions import Literal
+from fastapi import APIRouter, HTTPException
+from pydantic import validator
+from pydantic.main import BaseModel
+
 from server.api import RECEIVER
 
-receiver_bp = Blueprint("api/receiver", __name__)
+receiver_router = APIRouter(tags=["receiver"])
 
 
-@receiver_bp.route("volume", methods=["GET", "PUT"])
-def volume():
-    if request.method != "PUT":
-        return {"error": "only PUT requests are supported"}, 400
+class VolumeRequest(BaseModel):
+    amount: int
+    direction: Literal["up", "down"]
 
-    if not all(k in (request.json or {}) for k in ["amount", "direction"]):
-        return {"error": "request must contain amount and direction"}, 400
+    @validator("amount")
+    def validate_amount(cls, value: int):
+        if value < 1 or value > 5:
+            raise ValueError("amount must be between 1 and 5")
 
-    if request.json["direction"] not in ["up", "down"]:
-        return {"error": "direction must be up or down"}, 400
+        return value
 
-    try:
-        volume_amount = int(request.json["amount"])
-    except ValueError:
-        return {"error": "amount must be an int"}, 400
 
-    if volume_amount < 0 or volume_amount > 5:
-        return {"error": "amount must be between 1 and 5"}, 400
-
-    if request.json["direction"] == "up":
-        RECEIVER.send_command("VOLUP", volume_amount)
+@receiver_router.put("/volume", status_code=204)
+def change_volume(volume: VolumeRequest):
+    if volume.direction == "up":
+        RECEIVER.send_command("VOLUP", volume.amount)
     else:
-        RECEIVER.send_command("VOLDOWN", volume_amount)
+        RECEIVER.send_command("VOLDOWN", volume.amount)
 
     return "", 204
 
 
-@receiver_bp.route("input", methods=["GET"])
-def get_inputs():
-    return {"inputs": RECEIVER.get_inputs()}
+class InputResponse(BaseModel):
+    inputs: List[str]
 
 
-@receiver_bp.route("input", methods=["PUT"])
-def set_input():
-    if not "input" in (request.json or {}):
-        return {"error": "input is requred"}, 400
-    elif request.json["input"] not in RECEIVER.get_inputs():
-        return {"error": "input is invalid"}, 400
+@receiver_router.get("/input", response_model=InputResponse)
+def get_inputs() -> InputResponse:
+    return InputResponse(inputs=RECEIVER.get_inputs())
 
-    RECEIVER.set_input(request.json["input"])
 
-    return "", 204
+class InputRequest(BaseModel):
+    input: str
+
+
+@receiver_router.put("/input", status_code=204)
+def set_input(input: InputRequest):
+    if input.input not in RECEIVER.get_inputs():
+        raise HTTPException(
+            400, f"input is invalid, expected {RECEIVER.get_inputs()}"
+        )
+
+    RECEIVER.set_input(input.input)

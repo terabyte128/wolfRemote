@@ -1,9 +1,12 @@
+from typing import List
 import wakeonlan
+from fastapi import APIRouter, HTTPException
+from pydantic import validator
+from pydantic.main import BaseModel
 
-from flask import Blueprint, request
 from server.api import TV, RECEIVER
 
-seq_bp = Blueprint("sequences", __name__)
+sequences_router = APIRouter(tags=["sequences"])
 
 
 def chromecast():
@@ -51,18 +54,24 @@ SEQUENCES = {
 }
 
 
-@seq_bp.route("", methods=["GET", "PUT"])
-def sequence():
-    if request.method == "GET":
-        return {"all_sequences": list(SEQUENCES.keys())}
+class SequencesResponse(BaseModel):
+    all_sequences: List[str]
 
-    if "sequence" not in request.json or {}:
-        return {"error": "sequence is required"}, 400
 
-    sequence = request.json["sequence"]
+@sequences_router.get("", response_model=SequencesResponse)
+def get_sequences():
+    return SequencesResponse(all_sequences=list(SEQUENCES.keys()))
 
-    if sequence in SEQUENCES.keys():
-        SEQUENCES[sequence]()
-        return "", 204
+
+class RunSequenceRequest(BaseModel):
+    sequence: str
+
+
+@sequences_router.put("", status_code=204)
+def run_sequence(sequence: RunSequenceRequest):
+    if sequence.sequence in SEQUENCES.keys():
+        SEQUENCES[sequence.sequence]()
     else:
-        return {"error": "sequence not found"}, 404
+        raise HTTPException(
+            400, f"invalid sequence, expected {list(SEQUENCES.keys())}"
+        )

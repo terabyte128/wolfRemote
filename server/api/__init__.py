@@ -1,20 +1,20 @@
 import json
 import os
 import lifxlan
+import server
 
-from flask import current_app
 from server.devices.ir_remote import IRRemote
 from server.devices.vizio_tv import VizioTV
 
-with open(os.path.join(current_app.root_path, "config", "tv.json")) as f:
+config_path = os.path.join(os.path.dirname(server.__file__), "config")
+
+with open(os.path.join(config_path, "tv.json")) as f:
     _tv_constants = json.load(f)
 
-RECEIVER = IRRemote(
-    os.path.join(current_app.root_path, "config", "sony_strdh590.json"), 10
-)
+RECEIVER = IRRemote(os.path.join(config_path, "sony_strdh590.json"), 10)
 TV = VizioTV(_tv_constants["auth"], _tv_constants["ip"], _tv_constants["mac"])
 
-with open(os.path.join(current_app.root_path, "config", "lights.json")) as f:
+with open(os.path.join(config_path, "lights.json")) as f:
     things = json.load(f)
 
 LIGHTS = {}

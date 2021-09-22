@@ -1,8 +1,10 @@
+from typing import List
 import requests
 import time
 import warnings
 import urllib3
 from wakeonlan import send_magic_packet
+from pydantic import BaseModel
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -26,13 +28,17 @@ class VizioTV:
         r.raise_for_status()
 
     def _get_items(self, uri):
-        r = requests.get("{}/{}".format(self.address, uri), **self._request_args)
+        r = requests.get(
+            "{}/{}".format(self.address, uri), **self._request_args
+        )
         r.raise_for_status()
         return r.json()["ITEMS"]
 
     def _get_and_set_hashval(self, uri, value):
         # get hashval
-        r = requests.get("{}/{}".format(self.address, uri), **self._request_args)
+        r = requests.get(
+            "{}/{}".format(self.address, uri), **self._request_args
+        )
         r.raise_for_status()
 
         hashval = r.json()["ITEMS"][0]["HASHVAL"]
@@ -41,7 +47,9 @@ class VizioTV:
 
         # set new value
         r = requests.put(
-            "{}/{}".format(self.address, uri), json=payload, **self._request_args
+            "{}/{}".format(self.address, uri),
+            json=payload,
+            **self._request_args
         )
         r.raise_for_status()
 
@@ -59,7 +67,9 @@ class VizioTV:
             time.sleep(0.1)  # ew
 
         # also send power on signal via virtual remote
-        payload = {"KEYLIST": [{"CODESET": 11, "CODE": 1, "ACTION": "KEYPRESS"}]}
+        payload = {
+            "KEYLIST": [{"CODESET": 11, "CODE": 1, "ACTION": "KEYPRESS"}]
+        }
 
         self._put_payload("key_command/", payload)
 
@@ -75,11 +85,17 @@ class VizioTV:
             self._power_on_normal()
 
     def power_off(self):
-        payload = {"KEYLIST": [{"CODESET": 11, "CODE": 0, "ACTION": "KEYPRESS"}]}
+        payload = {
+            "KEYLIST": [{"CODESET": 11, "CODE": 0, "ACTION": "KEYPRESS"}]
+        }
 
         self._put_payload("key_command/", payload)
 
-    def get_input(self):
+    class Input(BaseModel):
+        active_input: str
+        inputs: List[str]
+
+    def get_input(self) -> Input:
         all_inputs = self._get_items(
             "menu_native/dynamic/tv_settings/devices/name_input"
         )
@@ -89,16 +105,23 @@ class VizioTV:
             "menu_native/dynamic/tv_settings/devices/current_input"
         )[0]["VALUE"]
 
-        return {"active_input": current_input, "inputs": all_inputs}
+        return self.Input(active_input=current_input, inputs=all_inputs)
 
     def set_input(self, new_input):
         self._get_and_set_hashval(
             "menu_native/dynamic/tv_settings/devices/current_input", new_input
         )
 
-    def get_backlight(self):
-        backlight = self._get_items("menu_native/dynamic/tv_settings/picture/backlight")
-        return {"current": backlight[0]["VALUE"], "max": 100, "min": 0}
+    class Backlight(BaseModel):
+        current: int
+        min: int
+        max: int
+
+    def get_backlight(self) -> Backlight:
+        backlight = self._get_items(
+            "menu_native/dynamic/tv_settings/picture/backlight"
+        )
+        return self.Backlight(current=backlight[0]["VALUE"], min=0, max=100)
 
     def set_backlight(self, backlight):
         assert backlight > 0 and backlight <= 100
@@ -106,17 +129,25 @@ class VizioTV:
             "menu_native/dynamic/tv_settings/picture/backlight", backlight
         )
 
-    def get_picture_mode(self):
-        modes = self._get_items("menu_native/dynamic/tv_settings/picture/picture_mode")
+    class PictureMode(BaseModel):
+        active_mode: str
+        modes: List[str]
+
+    def get_picture_mode(self) -> PictureMode:
+        modes = self._get_items(
+            "menu_native/dynamic/tv_settings/picture/picture_mode"
+        )
         current_mode = modes[0]["VALUE"]
         other_modes = modes[0]["ELEMENTS"]
 
         if current_mode[-1] == "*":
             current_mode = current_mode[:-1]
 
-        other_modes = [mode[:-1] if mode[-1] == "*" else mode for mode in other_modes]
+        other_modes = [
+            mode[:-1] if mode[-1] == "*" else mode for mode in other_modes
+        ]
 
-        return {"active_mode": current_mode, "modes": other_modes}
+        return self.PictureMode(active_mode=current_mode, modes=other_modes)
 
     def set_picture_mode(self, mode, also_send_star=True):
         self._get_and_set_hashval(
@@ -125,7 +156,8 @@ class VizioTV:
 
         if also_send_star:
             self._get_and_set_hashval(
-                "menu_native/dynamic/tv_settings/picture/picture_mode", mode + "*"
+                "menu_native/dynamic/tv_settings/picture/picture_mode",
+                mode + "*",
             )
 
     def volume_up(self, amount=1):
