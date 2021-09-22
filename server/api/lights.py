@@ -1,11 +1,13 @@
+from typing import Dict, Optional
 import lifxlan as lifx
 import logging
-
 import asyncio
-from server.api import LIGHTS
-from flask import Blueprint, request
+from fastapi import APIRouter, HTTPException
+from pydantic.main import BaseModel
 
-lights_bp = Blueprint("api/lights", __name__)
+from server.api import LIGHTS
+
+light_router = APIRouter(tags=["lights"])
 
 
 async def get_light_color(name: str, light: lifx.Light):
@@ -14,7 +16,7 @@ async def get_light_color(name: str, light: lifx.Light):
             name,
             light.get_color(),
         )
-    except lifx.WorkflowException as e:
+    except lifx.WorkflowException:
         logging.exception("Failed to communicate with lights")
         return (
             name,
@@ -22,7 +24,19 @@ async def get_light_color(name: str, light: lifx.Light):
         )
 
 
-async def get_lights_async():
+class LightColor(BaseModel):
+    hue: int
+    saturation: int
+    brightness: int
+    kelvin: int
+
+
+class Lights(BaseModel):
+    lights: Dict[str, LightColor]
+
+
+@light_router.get("", response_model=Lights)
+async def get_lights() -> Lights:
     lights = {}
     tasks = []
 
@@ -34,35 +48,46 @@ async def get_lights_async():
         light, color = await t
 
         if color is None:
-            return {
-                "error": "Failed to communicate with lights",
-            }, 500
+            raise HTTPException(502, "Failed to communicate with lights")
 
-        lights[light] = {
-            "hue": color[0],
-            "saturation": color[1],
-            "brightness": color[2],
-            "kelvin": color[3],
-        }
+        lights[light] = LightColor(
+            hue=color[0],
+            saturation=color[1],
+            brightness=color[2],
+            kelvin=color[3],
+        )
 
-    return lights
+    return Lights(lights=lights)
 
 
-@lights_bp.route("", methods=("GET",))
-def get_lights():
-    return asyncio.run(get_lights_async())
+class OptionalLightColor(BaseModel):
+    hue: Optional[int]
+    saturation: Optional[int]
+    brightness: Optional[int]
+    kelvin: Optional[int]
 
 
-async def set_light_color(name: str, light: lifx.Light, new_color: dict):
+class OptionalLights(BaseModel):
+    lights: Dict[str, OptionalLightColor]
+
+
+async def set_light_color(
+    name: str, light: lifx.Light, new_color: OptionalLightColor
+):
     try:
         orig_color = light.get_color()
         color = list(orig_color)
 
         for i, param in enumerate(
-            ["hue", "saturation", "brightness", "kelvin"]
+            [
+                new_color.hue,
+                new_color.saturation,
+                new_color.brightness,
+                new_color.kelvin,
+            ]
         ):
-            if param in new_color:
-                color[i] = new_color[param]
+            if param is not None:
+                color[i] = param
 
         if tuple(color) != orig_color:
             light.set_color(color, 500)
@@ -71,7 +96,7 @@ async def set_light_color(name: str, light: lifx.Light, new_color: dict):
             name,
             color,
         )
-    except lifx.WorkflowException as e:
+    except lifx.WorkflowException:
         logging.exception("Failed to communicate with lights")
         return (
             name,
@@ -79,13 +104,25 @@ async def set_light_color(name: str, light: lifx.Light, new_color: dict):
         )
 
 
-async def set_lights_async(request_data):
-    lights = {}
+@light_router.put(
+    "",
+    response_model=OptionalLights,
+    description="A dictionary of each light you wish to update, mapping to each "
+    "property you wish to change. Properties not given will remain the same.",
+)
+async def set_lights(lights: OptionalLights):
     tasks = []
 
+    invalid_names = [k for k in lights.lights.keys() if k not in LIGHTS.keys()]
+
+    if len(invalid_names) > 0:
+        raise HTTPException(
+            400, f"Invalid light names in request: {invalid_names}"
+        )
+
     for k, v in LIGHTS.items():
-        if k in request_data:
-            t = asyncio.create_task(set_light_color(k, v, request_data[k]))
+        if k in lights.lights:
+            t = asyncio.create_task(set_light_color(k, v, lights.lights[k]))
             tasks.append(t)
 
     for t in tasks:
@@ -96,16 +133,11 @@ async def set_lights_async(request_data):
                 "error": "Failed to communicate with lights",
             }, 500
 
-        lights[light] = {
-            "hue": color[0],
-            "saturation": color[1],
-            "brightness": color[2],
-            "kelvin": color[3],
-        }
+        lights.lights[light] = OptionalLightColor(
+            hue=color[0],
+            saturation=color[1],
+            brightness=color[2],
+            kelvin=color[3],
+        )
 
     return lights
-
-
-@lights_bp.route("", methods=("PUT",))
-def set_lights():
-    return asyncio.run(set_lights_async(request.json))

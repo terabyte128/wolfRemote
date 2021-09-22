@@ -1,38 +1,25 @@
 import logging
-from flask import Flask
-from flask_swagger_ui import get_swaggerui_blueprint
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-app = Flask(__name__)
+from .api.tv import tv_router
+from .api.lights import light_router
+from .api.receiver import receiver_router
+from .api.sequences import sequences_router
 
 logging.getLogger().setLevel(logging.INFO)
 
-with app.app_context():
-    from server.api.tv import tv_bp
-    from server.api.receiver import receiver_bp
-    from server.api.sequences import seq_bp, SEQUENCES
-    from server.api.lights import lights_bp
+app = FastAPI(title="wolfRemote", description="beep boop control things")
+app.include_router(tv_router, prefix="/api/v1/tv")
+app.include_router(light_router, prefix="/api/v1/lights")
+app.include_router(receiver_router, prefix="/api/v1/receiver")
+app.include_router(sequences_router, prefix="/api/v1/sequences")
 
 
-API_PREFIX = "/api/v1"
+class RootResponse(BaseModel):
+    hello: str
 
 
-# register API blueprints
-app.register_blueprint(tv_bp, url_prefix=f"/{API_PREFIX}/tv")
-app.register_blueprint(receiver_bp, url_prefix=f"{API_PREFIX}/receiver")
-app.register_blueprint(seq_bp, url_prefix=f"{API_PREFIX}/sequence")
-app.register_blueprint(lights_bp, url_prefix=f"{API_PREFIX}/lights")
-
-# register API docs blueprint
-SWAGGER_URL = "/api/docs"  # URL for exposing Swagger UI (without trailing '/')
-API_URL = (
-    "/static/openapi.yaml"  # Our API url (can of course be a local resource)
-)
-
-# Call factory function to create our blueprint
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
-    API_URL,
-    config={"app_name": "wolfRemote"},  # Swagger UI config overrides
-)
-
-app.register_blueprint(swaggerui_blueprint)
+@app.get("/", response_model=RootResponse)
+def root():
+    return RootResponse(hello="world")

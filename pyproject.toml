@@ -8,10 +8,9 @@ authors = ["Sam Wolfson <terabyte128@gmail.com>"]
 python = "^3.7"
 wakeonlan = "^2.0.1"
 requests = "^2.26.0"
-gunicorn = "^20.1.0"
-Flask = "^2.0.1"
-flask-swagger-ui = "^3.36.0"
 lifxlan = "^1.2.7"
+uvicorn = "^0.15.0"
+fastapi = "^0.68.1"
 
 [tool.poetry.dev-dependencies]
 
