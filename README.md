@@ -30,12 +30,10 @@ Control all your devices from a slick web UI!
 
 7. Install poetry: `curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -`
 
-8. Get a nice mug of hot chocolate, `cd` to the repo's root directory, and `poetry update`.
+8. Get a nice mug of hot chocolate, `cd` to the repo's root directory, and `poetry install`.
    (this might take a while, especially on a RPi Zero).
 
-## Configure webserver
-
-We're gonna use `nginx` because I like it better than Apache. And it seems like it might be faster on the annoyingly underpowered RPi Zero.
+## Configure webserver (nginx)
 
 7. `apt install nginx`
 
@@ -53,7 +51,7 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
     Group=video
 
     WorkingDirectory=/home/pi/remote
-    ExecStart=/usr/bin/pipenv run gunicorn -w 4 -t 60 --chdir server main:app
+    ExecStart=home/pi/.poetry/bin/poetry run uvicorn server.main:app
 
     [Install]
     WantedBy=multi-user.target
@@ -72,12 +70,7 @@ We're gonna use `nginx` because I like it better than Apache. And it seems like 
 					root /home/pi/remote/frontend/build;
 			}
 
-			location /api {
-					proxy_pass http://localhost:8000;
-			}
-
-			location /static/openapi.yaml {
-					# definitions for openapi are handled by the server
+			location ~ ^/(docs|redoc|api|openapi.json) {
 					proxy_pass http://localhost:8000;
 			}
 	}
