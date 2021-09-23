@@ -121,8 +121,9 @@ function App() {
                     let rsp = await fetch(url);
                     let json = await rsp.json();
 
-                    if ("error" in json) {
-                        throw Error(json["error"]);
+                    if (!rsp.ok) {
+                        const errorMessage = json["detail"] || "Unknown error";
+                        throw Error(errorMessage);
                     }
 
                     return json;
