@@ -105,7 +105,7 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
 
         Object.entries(LightGroups).forEach(([name, groupedLights]) => {
             const brightnesses = (groupedLights as readonly string[])
-                .filter((l) => l in lights)
+                .filter((l) => l in lights.lights)
                 .map((l) => lights.lights[l].brightness);
             values[name as string] = Math.max(...brightnesses);
         });
@@ -160,7 +160,9 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
                             type="checkbox"
                             style={{ marginRight: "6px" }}
                             checked={isSynced}
-                            onClick={() => setIsSynced((isSynced) => !isSynced)}
+                            onChange={() =>
+                                setIsSynced((isSynced) => !isSynced)
+                            }
                         />
                         Sync
                     </label>
