@@ -19,7 +19,6 @@ export async function putRequest(url: string, params: { [key: string]: any }) {
     }
 
     try {
-        console.log(JSON.parse(text));
         return JSON.parse(text);
     } catch (e) {
         return text;
