@@ -36,6 +36,17 @@ const routes = [
     },
 ];
 
+function wolfSpeed(x: number): number {
+    const mean = 180;
+    const stdev = 90;
+
+    const x1 = 1 / (stdev * Math.sqrt(2 * Math.PI));
+    const x2 = -0.5 * Math.pow((x - mean) / stdev, 2);
+    const res = x1 * Math.pow(Math.E, x2);
+
+    return Math.ceil(res * 1000);
+}
+
 function TopNav({ isLoading }: LoadingProps) {
     const [rotateDeg, setRotateDeg] = useState(0);
     const [rotateId, setRotateId] = useState(0);
@@ -44,11 +55,10 @@ function TopNav({ isLoading }: LoadingProps) {
     // nonsense to make spinny wolf
     useEffect(() => {
         if (isLoading && !rotateId) {
-            setRotateDeg(1);
             setRotateId(
                 window.setInterval(() => {
-                    setRotateDeg((deg) => deg + 1);
-                }, 1)
+                    setRotateDeg((deg) => deg + wolfSpeed(deg % 360));
+                }, 10)
             );
         } else if (!isLoading && rotateDeg % 360 === 0) {
             window.clearInterval(rotateId);
