@@ -1,4 +1,4 @@
 export interface LoadingProps {
-    isLoading: boolean;
-    setIsLoading: (isLoading: boolean) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 }
