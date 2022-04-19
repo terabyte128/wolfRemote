@@ -167,26 +167,28 @@ function LightBrightnessCard({ lights, setLights }: LightProps) {
         </span>
       </Card.Header>
       <Card.Body>
-        {Object.entries(brightness).map(([group, brightness]) => {
-          return (
-            <Form.Group key={group}>
-              <Form.Label>
-                {group}
-                <Form.Range
-                  min={0}
-                  max={65535}
-                  step={1}
-                  value={brightness}
-                  onChange={(e) =>
-                    handleChange(e, group as keyof typeof LightGroups)
-                  }
-                  onTouchEnd={handleFinish}
-                  onMouseUp={handleFinish}
-                />
-              </Form.Label>
-            </Form.Group>
-          );
-        })}
+        {Object.entries(brightness)
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([group, brightness]) => {
+            return (
+              <Form.Group key={group}>
+                <Form.Label>
+                  {group}
+                  <Form.Range
+                    min={0}
+                    max={65535}
+                    step={1}
+                    value={brightness}
+                    onChange={(e) =>
+                      handleChange(e, group as keyof typeof LightGroups)
+                    }
+                    onTouchEnd={handleFinish}
+                    onMouseUp={handleFinish}
+                  />
+                </Form.Label>
+              </Form.Group>
+            );
+          })}
       </Card.Body>
     </Card>
   );
